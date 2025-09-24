@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>장비 등록</title>
+</head>
+<body>
+<h1>장비 등록</h1>
+
+<div id="basicInfo">
+  <label>장치명: <input type="text" id="deviceName"></label><br>
+  <label>시리얼번호: <input type="text" id="deviceSerial"></label><br>
+  <label>IP: <input type="text" id="deviceIP"></label><br>
+  <label>Port: <input type="number" id="devicePort"></label><br>
+  <button id="registerDeviceBtn">연결</button>
+</div>
+
+<div id="dataSettings">
+  <!-- 데이터별 설정 동적 생성 -->
+</div>
+
+<button id="testBtn" disabled>테스트</button>
+<button id="finalRegisterBtn" disabled>최종 등록</button>
+
+<script src="../deviceRegister/deviceRegister.js"></script>
+</body>
+</html>
