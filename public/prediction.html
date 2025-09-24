@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>히스토리</title>
+        <title>예측</title>
         <link href="/css/styles.css" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
         <style>
@@ -163,7 +163,7 @@ button {
                                     <div id="sensor-list"></div>
                                 </aside>
                                 <main>
-                                    <h2>센서 히스토리 차트</h2>
+                                    <h2>센서 예측 차트</h2>
                                     <canvas id="myAreaChart"></canvas>
 
                                     <div class="controls">
@@ -305,7 +305,7 @@ button {
               };
 
               try {
-                const res = await fetch(`${API_BASE}/history`, {
+                const res = await fetch(`${API_BASE}/prediction`, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json'
@@ -324,32 +324,68 @@ button {
             }
 
             function renderChart(labels, datasets) {
-              const ctx = document.getElementById('myAreaChart').getContext('2d');
+  const ctx = document.getElementById('myAreaChart').getContext('2d');
 
-              if (chart) chart.destroy();
+  if (chart) chart.destroy();
 
-              chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                  labels,
-                  datasets: datasets.map(ds => ({
-                    label: ds.label,
-                    data: ds.values,
-                    borderColor: ds.color,
-                    backgroundColor: ds.color + '33',
-                    fill: true,
-                    tension: 0.4
-                  }))
-                },
-                options: {
-                  responsive: true,
-                  scales: {
-                    x: { title: { display: true, text: '시간' } },
-                    y: { title: { display: true, text: '센서값' } }
-                  }
-                }
-              });
-            }
+  const today = new Date().toISOString().split('T')[0]; // 오늘 날짜 yyyy-mm-dd 형식
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: datasets.map(ds => {
+        const dataBefore = [];
+        const dataAfter = [];
+
+        labels.forEach((label, i) => {
+          if (label <= today) {
+            dataBefore.push({ x: label, y: ds.values[i] });
+            dataAfter.push({ x: label, y: null }); // 점선에선 null
+          } else {
+            dataBefore.push({ x: label, y: null });
+            dataAfter.push({ x: label, y: ds.values[i] });
+          }
+        });
+
+        return [
+          {
+            label: ds.label + ' (기존)',
+            data: dataBefore,
+            borderColor: ds.color,
+            backgroundColor: ds.color + '33',
+            fill: true,
+            tension: 0.4,
+            borderDash: [] // 실선
+          },
+          {
+            label: ds.label + ' (예측)',
+            data: dataAfter,
+            borderColor: ds.color,
+            backgroundColor: 'rgba(0,0,0,0)', // 점선은 투명 배경
+            fill: false,
+            tension: 0.4,
+            borderDash: [5, 5] // 점선
+          }
+        ];
+      }).flat()
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { title: { display: true, text: '시간' } },
+        y: { title: { display: true, text: '센서값' } }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            filter: item => !item.text.includes('(기존)') // 범례에서 "기존"만 보이게 하려면 여기 수정 가능
+          }
+        }
+      }
+    }
+  });
+}
         </script>
     </body>
 </html>
