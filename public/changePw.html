@@ -7,7 +7,7 @@
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title>비밀번호 변경</title>
-        <link href="/css/styles.css" rel="stylesheet" />
+        <link href="/src/css/styles.css" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     </head>
     <body class="bg-primary">
@@ -58,7 +58,7 @@
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-        <script src="/js/scripts.js"></script>
+        <script src="/src/js/scripts.js"></script>
         <script>
             document.getElementById('changePwForm').addEventListener('submit', async function (e) {
                 e.preventDefault();
@@ -72,12 +72,13 @@
                 }
 
                 try {
-                    const response = await fetch('/api/changePw', {
+                    const response = await fetch('http://localhost:8080/api/changePw', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ username, email })
+                        // 여기서 id와 email 키를 맞춰서 보냅니다.
+                        body: JSON.stringify({ id: username, email: email })
                     });
 
                     if (!response.ok) {
@@ -86,7 +87,8 @@
 
                     const data = await response.json();
 
-                    if (data.success) {
+                    // 백엔드 응답이 status: 'success' 인지 확인
+                    if (data.status === 'success') {
                         alert('입력하신 이메일로 비밀번호 변경 링크가 전송되었습니다.');
                         window.location.href = '/login.html';
                     } else {

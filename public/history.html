@@ -1,355 +1,547 @@
 <!DOCTYPE html>
 <html lang="ko">
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>히스토리</title>
-        <link href="/css/styles.css" rel="stylesheet" />
-        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-        <style>
-            body {
-  font-family: Arial;
-  display: flex;
-  height: 100vh;
-  margin: 0;
-}
-
-.container {
-  display: flex;
-  width: 100%;
-}
-
-aside {
-  width: 250px;
-  background: #f0f0f0;
-  padding: 20px;
-  border-right: 1px solid #ccc;
-  overflow-y: auto;
-}
-
-main {
-  flex: 1;
-  padding: 20px;
-}
-
-.controls {
-  margin-top: 20px;
-}
-
-button {
-  margin-right: 10px;
-  padding: 5px 10px;
-}
-        </style>
-    </head>
-    <body class="sb-nav-fixed">
-        <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-            <!-- Navbar Brand-->
-            <a class="navbar-brand ps-3" href="/index.html">Start Bootstrap</a>
-            <!-- Sidebar Toggle-->
-            <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
-            <!-- Navbar Search-->
-            <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-                <div class="input-group">
-                    <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
-                    <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
-                </div>
-            </form>
-            <!-- Navbar-->
-            <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="#!">Settings</a></li>
-                        <li><a class="dropdown-item" href="#!">Activity Log</a></li>
-                        <li><hr class="dropdown-divider" /></li>
-                        <li><a class="dropdown-item" href="#!">Logout</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-        <div id="layoutSidenav">
-            <div id="layoutSidenav_nav">
-                <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-                    <div class="sb-sidenav-menu">
-                        <div class="nav">
-                            <div class="sb-sidenav-menu-heading">Core</div>
-                            <a class="nav-link" href="/index.html">
-                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                Dashboard
-                            </a>
-                            <div class="sb-sidenav-menu-heading">Interface</div>
-                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
-                                <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                                Layouts
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
-                                <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="">Static Navigation</a>
-                                    <a class="nav-link" href="">Light Sidenav</a>
-                                </nav>
-                            </div>
-                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
-                                <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
-                                Pages
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
-                                <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
-                                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseAuth" aria-expanded="false" aria-controls="pagesCollapseAuth">
-                                        Authentication
-                                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                                    </a>
-                                    <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
-                                        <nav class="sb-sidenav-menu-nested nav">
-                                            <a class="nav-link" href="/login.html">Login</a>
-                                            <a class="nav-link" href="/register.html">Register</a>
-                                            <a class="nav-link" href="/password.html">Forgot Password</a>
-                                        </nav>
-                                    </div>
-                                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseError" aria-expanded="false" aria-controls="pagesCollapseError">
-                                        Error
-                                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                                    </a>
-                                    <div class="collapse" id="pagesCollapseError" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
-                                        <nav class="sb-sidenav-menu-nested nav">
-                                            <a class="nav-link" href="">401 Page</a>
-                                            <a class="nav-link" href="">404 Page</a>
-                                            <a class="nav-link" href="">500 Page</a>
-                                        </nav>
-                                    </div>
-                                </nav>
-                            </div>
-                            <div class="sb-sidenav-menu-heading">Addons</div>
-                            <a class="nav-link" href="/history.html">
-                                <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                                Charts
-                            </a>
-                            <a class="nav-link" href="">
-                                <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                                Tables
-                            </a>
-                        </div>
-                    </div>
-                    <div class="sb-sidenav-footer">
-                        <div class="small">Logged in as:</div>
-                        Start Bootstrap
-                    </div>
-                </nav>
-            </div>
-            <div id="layoutSidenav_content">
-                <main>
-                    <div class="container-fluid px-4">
-                        <h1 class="mt-4">Charts</h1>
-                        <ol class="breadcrumb mb-4">
-                            <li class="breadcrumb-item"><a href="/index.html">Dashboard</a></li>
-                            <li class="breadcrumb-item active">Charts</li>
-                        </ol>
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                Chart.js is a third party plugin that is used to generate the charts in this template. The charts below have been customized - for further customization options, please visit the official
-                                <a target="_blank" href="https://www.chartjs.org/docs/latest/">Chart.js documentation</a>
-                                .
-                            </div>
-                        </div>
-                        <div class="card mb-4">
-                            <div class="container">
-                                <aside>
-                                    <h3>센서 목록</h3>
-                                    <div id="sensor-list"></div>
-                                </aside>
-                                <main>
-                                    <h2>센서 히스토리 차트</h2>
-                                    <canvas id="myAreaChart"></canvas>
-
-                                    <div class="controls">
-                                        <button onclick="setRange('day')">일간</button>
-                                        <button onclick="setRange('week')">주간</button>
-                                        <button onclick="setRange('month')">월간</button>
-                                        <button onclick="setRange('year')">연간</button>
-
-                                        <input type="date" id="startDate" />
-                                        <input type="date" id="endDate" />
-                                        <button onclick="setCustomRange()">기간 적용</button>
-                                    </div>
-                                </main>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-                <footer class="py-4 bg-light mt-auto">
-                    <div class="container-fluid px-4">
-                        <div class="d-flex align-items-center justify-content-between small">
-                            <div class="text-muted">Copyright &copy; Your Website 2023</div>
-                            <div>
-                                <a href="#">Privacy Policy</a>
-                                &middot;
-                                <a href="#">Terms &amp; Conditions</a>
-                            </div>
-                        </div>
-                    </div>
-                </footer>
-            </div>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>히스토리</title>
+    <link href="/src/css/styles.css" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: Arial;
+            display: flex;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+        }
+        aside {
+            width: 250px;
+            background: #f0f0f0;
+            padding: 20px;
+            border-right: 1px solid #ccc;
+            overflow-y: auto;
+        }
+        main {
+            flex: 1;
+            padding: 20px;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            margin-right: 10px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body class="sb-nav-fixed">
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <a class="navbar-brand ps-3" href="/index.html">Start Bootstrap</a>
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+    <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
+        <div class="input-group">
+            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
+            <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-        <script src="/js/scripts.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-        <script>
-            let selectedSensors = [];
-            let sensors = [];
-            let currentRange = { type: 'week' };
-            let chart;
-            const API_BASE = 'http://localhost:8080/api';
+    </form>
+    <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="#!">Settings</a></li>
+                <li><a class="dropdown-item" href="#!">Activity Log</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" href="#!">Logout</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+<div id="layoutSidenav">
+    <div id="layoutSidenav_nav">
+        <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+            <div class="sb-sidenav-menu">
+                <div class="nav">
+                    <div class="sb-sidenav-menu-heading">Core</div>
+                    <a class="nav-link" href="/index.html">
+                        <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                        Dashboard
+                    </a>
+                    <div class="sb-sidenav-menu-heading">Interface</div>
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
+                        <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
+                        Layouts
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" href="">Static Navigation</a>
+                            <a class="nav-link" href="">Light Sidenav</a>
+                        </nav>
+                    </div>
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
+                        <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                        Pages
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseAuth" aria-expanded="false" aria-controls="pagesCollapseAuth">
+                                Authentication
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                            </a>
+                            <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    <a class="nav-link" href="/login.html">Login</a>
+                                    <a class="nav-link" href="/register.html">Register</a>
+                                    <a class="nav-link" href="/password.html">Forgot Password</a>
+                                </nav>
+                            </div>
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseError" aria-expanded="false" aria-controls="pagesCollapseError">
+                                Error
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                            </a>
+                            <div class="collapse" id="pagesCollapseError" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    <a class="nav-link" href="">401 Page</a>
+                                    <a class="nav-link" href="">404 Page</a>
+                                    <a class="nav-link" href="">500 Page</a>
+                                </nav>
+                            </div>
+                        </nav>
+                    </div>
+                    <div class="sb-sidenav-menu-heading">Addons</div>
+                    <a class="nav-link" href="/history.html">
+                        <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                        Charts
+                    </a>
+                    <a class="nav-link" href="">
+                        <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                        Tables
+                    </a>
+                </div>
+            </div>
+            <div class="sb-sidenav-footer">
+                <div class="small">Logged in as:</div>
+                Start Bootstrap
+            </div>
+        </nav>
+    </div>
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid px-4">
+                <h1 class="mt-4">Charts</h1>
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item"><a href="/index.html">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Charts</li>
+                </ol>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        Chart.js is a third party plugin that is used to generate the charts in this template. The charts below have been customized - for further customization options, please visit the official
+                        <a target="_blank" href="https://www.chartjs.org/docs/latest/">Chart.js documentation</a>.
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="container">
+                        <aside>
+                            <h3>센서 목록</h3>
+                            <select id="sensor-select" multiple style="width: 100%; height: 150px;"></select>
+                            <button id="loadChartBtn">차트 불러오기</button>
+                        </aside>
+                        <main>
+                            <h2>센서 히스토리 차트</h2>
+                            <canvas id="myAreaChart"></canvas>
 
-            // 센서 목록 로딩
-            fetch(`${API_BASE}/sensors`)
-              .then(res => res.json())
-              .then(data => {
-                sensors = data;
-                renderSensorList();
-              })
-              .catch(err => {
-                console.error('센서 목록 불러오기 실패:', err);
-                alert('센서 목록을 불러오는 데 실패했습니다.');
-              });
+                            <div class="controls">
+                                <button onclick="setRange('daily')">일간</button>
+                                <button onclick="setRange('week')">주간</button>
+                                <button onclick="setRange('month')">월간</button>
+                                <button onclick="setRange('year')">연간</button>
 
-            function renderSensorList() {
-              const container = document.getElementById('sensor-list');
-              container.innerHTML = '';
+                                <input type="date" id="startDate" />
+                                <input type="date" id="endDate" />
+                                <button onclick="setCustomRange()">기간 적용</button>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer class="py-4 bg-light mt-auto">
+            <div class="container-fluid px-4">
+                <div class="d-flex align-items-center justify-content-between small">
+                    <div class="text-muted">Copyright &copy; Your Website 2023</div>
+                    <div>
+                        <a href="#">Privacy Policy</a> &middot; <a href="#">Terms &amp; Conditions</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
 
-              sensors.forEach(sensor => {
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.id = `sensor-${sensor.id}`;
-                checkbox.value = sensor.id;
-                checkbox.addEventListener('change', () => handleSensorSelect(sensor, checkbox));
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // API 기본 URL
+    const API_BASE = "http://localhost:8080/api";
 
-                const label = document.createElement('label');
-                label.innerText = `${sensor.name} (${sensor.unit})`;
-                label.htmlFor = checkbox.id;
+    // 센서 목록 및 차트 인스턴스 저장용
+    let sensors = [];
+    let myChart = null;
 
-                container.appendChild(checkbox);
-                container.appendChild(label);
-                container.appendChild(document.createElement('br'));
-              });
-            }
+    // unitId 에 따른 단위명 매핑
+    const unitMap = {
+        1: "℃",
+        2: "%",
+        3: "ppm",
+        // 필요한 단위 추가
+    };
 
-            function handleSensorSelect(sensor, checkbox) {
-              const alreadySelected = selectedSensors.find(s => s.id === sensor.id);
+    // 페이지 로드 시 센서 목록 가져오기
+    window.onload = () => {
+        fetchSensors();
+        initDateInputs();
+        document.getElementById("loadChartBtn").addEventListener("click", onLoadChartClick);
+    };
 
-              if (alreadySelected) {
-                selectedSensors = selectedSensors.filter(s => s.id !== sensor.id);
-              } else {
-                const unitsSelected = [...new Set(selectedSensors.map(s => s.unit))];
+    function groupSensorsByUnit(sensorIds) {
+    // sensorIds 배열에 해당하는 센서들을 unitId별로 그룹화
+    const grouped = {};
+    sensorIds.forEach(id => {
+        const sensor = sensors.find(s => s.sensorId === id);
+        if (!sensor) return;
+        if (!grouped[sensor.unitId]) {
+            grouped[sensor.unitId] = [];
+        }
+        grouped[sensor.unitId].push(sensor.sensorId);
+    });
+    return grouped;
+}
 
-                // 단위가 다른 센서가 2개 이상이면 제한
-                if (!selectedSensors.some(s => s.unit === sensor.unit)) {
-                  if (unitsSelected.length >= 2) {
-                    alert("서로 다른 단위의 센서는 2개까지만 선택 가능합니다.");
-                    checkbox.checked = false;
-                    return;
-                  }
-                }
+    // 센서 목록 API 호출
+    function fetchSensors() {
+        fetch(`${API_BASE}/sensors`)
+            .then(res => res.json())
+            .then(data => {
+                sensors = data; // SensorResponseDTO 배열 가정
+                renderSensorOptions();
+            })
+            .catch(err => {
+                console.error("센서 목록 불러오기 실패:", err);
+                alert("센서 목록을 불러오는 데 실패했습니다.");
+            });
+    }
 
-                selectedSensors.push(sensor);
-              }
+    // 셀렉트 박스에 센서 옵션 렌더링
+    function renderSensorOptions() {
+        const select = document.getElementById("sensor-select");
+        select.innerHTML = "";
+        sensors.forEach(sensor => {
+            const option = document.createElement("option");
+            option.value = sensor.sensorId;
+            const unitName = unitMap[sensor.unitId] || "단위없음";
+            option.text = `${sensor.name} (${unitName})`;
+            select.appendChild(option);
+        });
+    }
 
-              fetchAndRenderChart();
-            }
+    // 선택된 센서 아이디 배열 가져오기
+    function getSelectedSensorIds() {
+        const select = document.getElementById("sensor-select");
+        return Array.from(select.selectedOptions).map(opt => Number(opt.value));
+    }
 
-            function setRange(type) {
-              currentRange = { type };
-              fetchAndRenderChart();
-            }
+    // 선택된 센서 유효성 검사
+    function validateSelection(selectedIds) {
+        if (selectedIds.length === 0) {
+            alert("하나 이상의 센서를 선택해주세요.");
+            return false;
+        }
+        const selectedSensors = sensors.filter(s => selectedIds.includes(s.sensorId));
+        const uniqueUnits = [...new Set(selectedSensors.map(s => s.unitId))];
+        if (uniqueUnits.length > 2) {
+            alert("서로 다른 단위의 센서는 2개까지만 선택 가능합니다.");
+            return false;
+        }
+        return true;
+    }
 
-            function setCustomRange() {
-              const start = document.getElementById('startDate').value;
-              const end = document.getElementById('endDate').value;
+    // 날짜 input 기본값 세팅 (오늘 날짜)
+    function initDateInputs() {
+        const today = new Date().toISOString().slice(0, 10);
+        document.getElementById("startDate").value = today;
+        document.getElementById("endDate").value = today;
+    }
 
-              if (!start || !end) {
-                alert("시작일과 종료일을 입력하세요.");
-                return;
-              }
+    // 차트 데이터 조회 후 렌더링
+    function loadChartData(sensorIds, startDate, endDate) {
+    const yGroups = groupSensorsByUnit(sensorIds);
 
-              currentRange = { type: 'custom', startDate: start, endDate: end };
-              fetchAndRenderChart();
-            }
+    // yGroups 객체를 DTO 배열 형태로 변환
+    const yGroupsArray = Object.entries(yGroups).map(([unitId, sensorIds]) => ({
+        unitId: Number(unitId),
+        sensorIds: sensorIds
+    }));
 
-            async function fetchAndRenderChart() {
-              if (selectedSensors.length === 0) return;
+    const requestBody = {
+        startDate: startDate,
+        endDate: endDate,
+        unit: "daily",
+        y: yGroupsArray
+    };
 
-              // 1. 센서를 unitId 기준으로 그룹핑
-              const groupedByUnit = {};
-              selectedSensors.forEach(sensor => {
-                if (!groupedByUnit[sensor.unitId]) {
-                  groupedByUnit[sensor.unitId] = [];
-                }
-                groupedByUnit[sensor.unitId].push(sensor.id);
-              });
+    fetch(`${API_BASE}/history`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        renderChartDataFromResponse(data);
+    })
+    .catch(err => {
+        console.error("차트 데이터 불러오기 실패:", err);
+        alert("차트 데이터를 불러오는 데 실패했습니다.");
+    });
 
-              // 2. DTO 구성 (HistoryRequestDTO와 일치)
-              const y = Object.entries(groupedByUnit).map(([unitId, sensorIds]) => ({
-                unitId: parseInt(unitId),
-                sensorIds
-              }));
+    fetch(`${API_BASE}/history`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        // TODO: data가 HistoryResponseDTO 형태임을 감안해서 적절히 파싱 후 차트 렌더링
+        renderChartDataFromResponse(data);
+    })
+    .catch(err => {
+        console.error("차트 데이터 불러오기 실패:", err);
+        alert("차트 데이터를 불러오는 데 실패했습니다.");
+    });
+}
 
-              const payload = {
-                startDate: currentRange.type === 'custom' ? currentRange.startDate : null,
-                endDate: currentRange.type === 'custom' ? currentRange.endDate : null,
-                unit: currentRange.type.toUpperCase(), // 'DAY', 'WEEK', 'MONTH', 'YEAR'
-                y
-              };
+        // API 호출 예시 (GET 쿼리 파라미터 혹은 POST 방식에 맞게 조정 필요)
+        fetch('http://localhost:8080/api/history', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    sensorIds: [28],
+    start: '2025-08-25',
+    end: '2025-09-25'
+  })
+})
+.then(response => response.json())
+.then(data => {
+  // 처리
+})
+.catch(err => console.error(err));
 
-              try {
-                const res = await fetch(`${API_BASE}/history`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(payload)
-                });
+    // 차트 렌더링 함수
+    function renderChart(data, sensorIds) {
+        // 데이터 구조 예시: [{deviceSerial, sensorId, name, value, unitId, referenceValue, timestamp}, ...]
+        // 타임스탬프 기준으로 라벨 만들기 (중복 제거)
+        const timestamps = [...new Set(data.map(d => d.timestamp))].sort();
 
-                if (!res.ok) throw new Error('데이터 요청 실패');
+        // 각 센서별 데이터 배열 생성
+        const datasets = sensorIds.map((id, idx) => {
+            const sensor = sensors.find(s => s.sensorId === id);
+            const unitName = unitMap[sensor.unitId] || "";
+            const sensorData = timestamps.map(time => {
+                const record = data.find(d => d.sensorId === id && d.timestamp === time);
+                return record ? record.value : null;
+            });
+            const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
 
-                const { labels, datasets } = await res.json();
-                renderChart(labels, datasets);
-              } catch (e) {
-                console.error(e);
-                alert('데이터를 불러오는 중 오류가 발생했습니다.');
-              }
-            }
+            return {
+                label: `${sensor.name} (${unitName})`,
+                data: sensorData,
+                fill: true,
+                borderColor: colors[idx % colors.length],
+                backgroundColor: colors[idx % colors.length] + "66", // 투명도 추가
+                spanGaps: true,
+            };
+        });
 
-            function renderChart(labels, datasets) {
-              const ctx = document.getElementById('myAreaChart').getContext('2d');
-
-              if (chart) chart.destroy();
-
-              chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                  labels,
-                  datasets: datasets.map(ds => ({
-                    label: ds.label,
-                    data: ds.values,
-                    borderColor: ds.color,
-                    backgroundColor: ds.color + '33',
-                    fill: true,
-                    tension: 0.4
-                  }))
+        const ctx = document.getElementById("myAreaChart").getContext("2d");
+        if (myChart) {
+            myChart.destroy();
+        }
+        myChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: timestamps,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: "top",
+                    },
+                    tooltip: {
+                        mode: "index",
+                        intersect: false,
+                    }
                 },
-                options: {
-                  responsive: true,
-                  scales: {
-                    x: { title: { display: true, text: '시간' } },
-                    y: { title: { display: true, text: '센서값' } }
-                  }
+                interaction: {
+                    mode: "nearest",
+                    axis: "x",
+                    intersect: false
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: "시간"
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: "값"
+                        }
+                    }
                 }
-              });
             }
-        </script>
-    </body>
+        });
+    }
+
+    // 차트 불러오기 버튼 클릭 핸들러
+    function onLoadChartClick() {
+        const selectedIds = getSelectedSensorIds();
+        if (!validateSelection(selectedIds)) return;
+
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+
+        if (new Date(startDate) > new Date(endDate)) {
+            alert("시작일이 종료일보다 늦을 수 없습니다.");
+            return;
+        }
+
+        loadChartData(selectedIds, startDate, endDate);
+    }
+
+    // 기간 설정 함수 (일간, 주간, 월간, 연간)
+    function setRange(range) {
+        const end = new Date();
+        let start = new Date();
+
+        switch (range) {
+            case "daily":
+                // 오늘 하루
+                break;
+            case "week":
+                start.setDate(end.getDate() - 7);
+                break;
+            case "month":
+                start.setMonth(end.getMonth() - 1);
+                break;
+            case "year":
+                start.setFullYear(end.getFullYear() - 1);
+                break;
+            default:
+                return;
+        }
+
+        document.getElementById("startDate").value = start.toISOString().slice(0, 10);
+        document.getElementById("endDate").value = end.toISOString().slice(0, 10);
+    }
+
+    // 사용자 지정 기간 적용 버튼
+    function setCustomRange() {
+        onLoadChartClick();
+    }
+
+    function renderChartDataFromResponse(response) {
+    // response.y는 UnitInfo 배열
+    // response.data는 TimestampGroup 배열
+
+    // 타임스탬프 배열 생성 (정렬)
+    const timestamps = response.data.map(g => g.timestamp).sort();
+
+    // unitId별 센서별 값 map 만들기 (sensorId -> [values])
+    const sensorDataMap = {};
+
+    response.data.forEach(group => {
+        group.values.forEach(value => {
+            if (!sensorDataMap[value.sensorId]) {
+                sensorDataMap[value.sensorId] = [];
+            }
+            sensorDataMap[value.sensorId].push({ timestamp: group.timestamp, value: value.value });
+        });
+    });
+
+    // 선택된 센서 Id 목록
+    const sensorIds = Object.keys(sensorDataMap).map(id => Number(id));
+
+    // Chart.js용 데이터셋 구성
+    const datasets = sensorIds.map((id, idx) => {
+        const sensor = sensors.find(s => s.sensorId === id);
+        const unitName = unitMap[sensor?.unitId] || "";
+        // 타임스탬프 기준으로 값 매칭 (null은 결측치)
+        const dataPoints = timestamps.map(t => {
+            const record = sensorDataMap[id].find(r => r.timestamp === t);
+            return record ? record.value : null;
+        });
+
+        const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+
+        return {
+            label: `${sensor?.name || 'Unknown'} (${unitName})`,
+            data: dataPoints,
+            fill: true,
+            borderColor: colors[idx % colors.length],
+            backgroundColor: colors[idx % colors.length] + '66',
+            spanGaps: true,
+        };
+    });
+
+    // 차트 업데이트
+    const ctx = document.getElementById("myAreaChart").getContext("2d");
+    if (myChart) myChart.destroy();
+
+    myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: timestamps,
+            datasets: datasets,
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false,
+            },
+            scales: {
+                x: { display: true, title: { display: true, text: '시간' } },
+                y: { display: true, title: { display: true, text: '값' } },
+            }
+        }
+    });
+}
+</script>
+</body>
 </html>

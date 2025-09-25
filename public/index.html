@@ -1,384 +1,451 @@
 <!DOCTYPE html>
 <html lang="ko">
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>Dashboard - SB Admin</title>
-        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
-        <link href="/css/styles.css" rel="stylesheet" />
-        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-        <style>
-            body {
-              display: flex;
-              margin: 0;
-              font-family: sans-serif;
-              height: 100vh;
-            }
-            .panel {
-              width: 30%;
-              padding: 10px;
-              border-right: 1px solid #ccc;
-              background: #f9f9f9;
-            }
-            .graph-area {
-              flex: 1;
-              padding: 10px;
-              background: #f4f4f4;
-              overflow-y: auto;
-            }
-            .sensor-item {
-              border: 1px solid #aaa;
-              padding: 5px;
-              margin-bottom: 8px;
-              background: white;
-            }
-            .sensor-details {
-              margin-top: 5px;
-              background: #eee;
-              padding: 5px;
-            }
-            .draggable {
-              cursor: grab;
-            }
-            .drop-zone {
-              border: 2px dashed #999;
-              padding: 20px;
-              min-height: 200px;
-              background: white;
-            }
-            .graph-block {
-              background: #fff;
-              padding: 10px;
-              margin-top: 20px;
-              border: 1px solid #ccc;
-            }
-        </style>
-    </head>
-    <body class="sb-nav-fixed">
-        <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-            <!-- Navbar Brand-->
-            <a class="navbar-brand ps-3" href="/index.html">Start Bootstrap</a>
-            <!-- Sidebar Toggle-->
-            <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
-            <!-- Navbar Search-->
-            <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-                <div class="input-group">
-                    <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
-                    <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
-                </div>
-            </form>
-            <!-- Navbar-->
-            <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="#!">Settings</a></li>
-                        <li><a class="dropdown-item" href="#!">Activity Log</a></li>
-                        <li><hr class="dropdown-divider" /></li>
-                        <li><a class="dropdown-item" href="#!">Logout</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-        <div id="layoutSidenav">
-            <div id="layoutSidenav_nav">
-                <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-                    <div class="sb-sidenav-menu">
-                        <div class="nav">
-                            <div class="sb-sidenav-menu-heading">Core</div>
-                            <a class="nav-link" href="index.html">
-                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                Dashboard
-                            </a>
-                            <div class="sb-sidenav-menu-heading">Interface</div>
-                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
-                                <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                                Layouts
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
-                                <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="../../../../../Users/cws/Downloads/startbootstrap-sb-admin-gh-pages/layout-static.html">Static Navigation</a>
-                                    <a class="nav-link" href="../../../../../Users/cws/Downloads/startbootstrap-sb-admin-gh-pages/layout-sidenav-light.html">Light Sidenav</a>
-                                </nav>
-                            </div>
-                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
-                                <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
-                                Pages
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
-                                <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
-                                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseAuth" aria-expanded="false" aria-controls="pagesCollapseAuth">
-                                        Authentication
-                                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                                    </a>
-                                    <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
-                                        <nav class="sb-sidenav-menu-nested nav">
-                                            <a class="nav-link" href="login.html">Login</a>
-                                            <a class="nav-link" href="register.html">Register</a>
-                                            <a class="nav-link" href="password.html">Forgot Password</a>
-                                        </nav>
-                                    </div>
-                                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseError" aria-expanded="false" aria-controls="pagesCollapseError">
-                                        Error
-                                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                                    </a>
-                                    <div class="collapse" id="pagesCollapseError" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
-                                        <nav class="sb-sidenav-menu-nested nav">
-                                            <a class="nav-link" href="../../../../../Users/cws/Downloads/startbootstrap-sb-admin-gh-pages/401.html">401 Page</a>
-                                            <a class="nav-link" href="../../../../../Users/cws/Downloads/startbootstrap-sb-admin-gh-pages/404.html">404 Page</a>
-                                            <a class="nav-link" href="../../../../../Users/cws/Downloads/startbootstrap-sb-admin-gh-pages/500.html">500 Page</a>
-                                        </nav>
-                                    </div>
-                                </nav>
-                            </div>
-                            <div class="sb-sidenav-menu-heading">Addons</div>
-                            <a class="nav-link" href="charts.html">
-                                <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                                Charts
-                            </a>
-                            <a class="nav-link" href="../../../../../Users/cws/Downloads/startbootstrap-sb-admin-gh-pages/tables.html">
-                                <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                                Tables
-                            </a>
-                        </div>
-                    </div>
-                    <div class="sb-sidenav-footer">
-                        <div class="small">Logged in as:</div>
-                        Start Bootstrap
-                    </div>
-                </nav>
-            </div>
-            <div id="layoutSidenav_content">
-                <main>
-                    <div class="container-fluid px-4">
-                        <h1 class="mt-4">Dashboard</h1>
-                        <ol class="breadcrumb mb-4">
-                            <li class="breadcrumb-item active">Dashboard</li>
-                        </ol>
-                        <div class="row">
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-primary text-white mb-4">
-                                    <div class="card-body">Primary Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-warning text-white mb-4">
-                                    <div class="card-body">Warning Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-success text-white mb-4">
-                                    <div class="card-body">Success Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xl-3 col-md-6">
-                                <div class="card bg-danger text-white mb-4">
-                                    <div class="card-body">Danger Card</div>
-                                    <div class="card-footer d-flex align-items-center justify-content-between">
-                                        <a class="small text-white stretched-link" href="#">View Details</a>
-                                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xl-6">
-                                <div class="card mb-4">
-                                    <div class="panel" id="sensorPanel">
-                                        <h3>센서 목록</h3>
-                                    </div>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Dashboard - SB Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+    <link href="/src/css/styles.css" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+          display: flex;
+          margin: 0;
+          font-family: sans-serif;
+          height: 100vh;
+          flex-direction: column;
+        }
+        /* 상단 네비게이션 바 높이 제외하고 컨텐츠 높이 지정 */
+        #layoutSidenav_content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+        main {
+          flex: 1;
+          overflow: hidden;
+        }
+        .container-fluid {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+        }
 
-                                    <div class="graph-area">
-                                        <h3>그래프 영역</h3>
-                                        <div class="drop-zone" id="dropZone">
-                                            센서를 드래그하여 그래프를 추가하세요
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-                <footer class="py-4 bg-light mt-auto">
-                    <div class="container-fluid px-4">
-                        <div class="d-flex align-items-center justify-content-between small">
-                            <div class="text-muted">Copyright &copy; Your Website 2023</div>
-                            <div>
-                                <a href="#">Privacy Policy</a>
-                                &middot;
-                                <a href="#">Terms &amp; Conditions</a>
-                            </div>
-                        </div>
-                    </div>
-                </footer>
-            </div>
+        /* 센서목록 + 그래프 영역 부모 컨테이너 */
+        .dashboard-container {
+          display: flex;
+          gap: 10px;
+          height: 400px; /* 높이 조절 가능 */
+          overflow: hidden;
+        }
+
+        .panel {
+          width: 30%;
+          padding: 10px;
+          border-right: 1px solid #ccc;
+          background: #f9f9f9;
+          overflow-y: auto;
+          box-sizing: border-box;
+        }
+
+        .graph-area {
+          flex: 1;
+          padding: 10px;
+          background: #f4f4f4;
+          overflow-y: auto;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .drop-zone {
+          border: 2px dashed #999;
+          padding: 20px;
+          flex: 1;
+          background: white;
+          overflow-y: auto;
+          min-height: 200px;
+        }
+
+        .sensor-item {
+          border: 1px solid #aaa;
+          padding: 5px;
+          margin-bottom: 8px;
+          background: white;
+        }
+
+        .sensor-details {
+          margin-top: 5px;
+          background: #eee;
+          padding: 5px;
+        }
+
+        .draggable {
+          cursor: grab;
+        }
+
+        .graph-block {
+          background: #fff;
+          padding: 10px;
+          margin-top: 20px;
+          border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body class="sb-nav-fixed">
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <!-- Navbar Brand-->
+    <a class="navbar-brand ps-3" href="/index.html">Start Bootstrap</a>
+    <!-- Sidebar Toggle-->
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+    <!-- Navbar Search-->
+    <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
+        <div class="input-group">
+            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
+            <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-        <script src="/js/scripts.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
-        <script>
-            const sensors = [
-              { id: 'temp', name: '온도센서', unit: '°C' },
-              { id: 'hum', name: '습도센서', unit: '%' },
-              { id: 'gyro', name: '자이로센서', unit: '°/s' },
-            ];
+    </form>
+    <!-- Navbar-->
+    <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="#!">Settings</a></li>
+                <li><a class="dropdown-item" href="#!">Activity Log</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" href="#!">Logout</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+<div id="layoutSidenav">
+    <div id="layoutSidenav_nav">
+        <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+            <div class="sb-sidenav-menu">
+                <div class="nav">
+                    <div class="sb-sidenav-menu-heading">Core</div>
+                    <a class="nav-link" href="index.html">
+                        <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                        Dashboard
+                    </a>
+                    <div class="sb-sidenav-menu-heading">Interface</div>
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
+                        <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
+                        Layouts
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" href="#">Static Navigation</a>
+                            <a class="nav-link" href="#">Light Sidenav</a>
+                        </nav>
+                    </div>
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
+                        <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                        Pages
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseAuth" aria-expanded="false" aria-controls="pagesCollapseAuth">
+                                Authentication
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                            </a>
+                            <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    <a class="nav-link" href="login.html">Login</a>
+                                    <a class="nav-link" href="register.html">Register</a>
+                                    <a class="nav-link" href="password.html">Forgot Password</a>
+                                </nav>
+                            </div>
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseError" aria-expanded="false" aria-controls="pagesCollapseError">
+                                Error
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                            </a>
+                            <div class="collapse" id="pagesCollapseError" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    <a class="nav-link" href="#">401 Page</a>
+                                    <a class="nav-link" href="#">404 Page</a>
+                                    <a class="nav-link" href="#">500 Page</a>
+                                </nav>
+                            </div>
+                        </nav>
+                    </div>
+                    <div class="sb-sidenav-menu-heading">Addons</div>
+                    <a class="nav-link" href="charts.html">
+                        <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                        Charts
+                    </a>
+                    <a class="nav-link" href="tables.html">
+                        <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                        Tables
+                    </a>
+                </div>
+            </div>
+            <div class="sb-sidenav-footer">
+                <div class="small">Logged in as:</div>
+                Start Bootstrap
+            </div>
+        </nav>
+    </div>
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid px-4">
+                <h1 class="mt-4">Dashboard</h1>
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item active">Dashboard</li>
+                </ol>
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="card mb-4">
+                            <div class="dashboard-container">
+                                <div class="panel" id="sensorPanel">
+                                    <h3>센서 목록</h3>
+                                    <!-- 센서 목록 여기 렌더링 -->
+                                </div>
 
-            const panel = document.getElementById('sensorPanel');
-            const dropZone = document.getElementById('dropZone');
+                                <div class="graph-area">
+                                    <h3>그래프 영역</h3>
+                                    <div class="drop-zone" id="dropZone">
+                                        센서를 드래그하여 그래프를 추가하세요
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer class="py-4 bg-light mt-auto">
+            <div class="container-fluid px-4">
+                <div class="d-flex align-items-center justify-content-between small">
+                    <div class="text-muted">Copyright &copy; Your Website 2023</div>
+                    <div>
+                        <a href="#">Privacy Policy</a>
+                        &middot;
+                        <a href="#">Terms &amp; Conditions</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
 
-            const activeCharts = {};  // 센서 ID별 Chart 인스턴스 저장
-            const sensorData = {};    // 센서 ID별 실시간 데이터 배열
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="/src/js/scripts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+<script>
+    const sensors = [];
+const panel = document.getElementById('sensorPanel');
+const dropZone = document.getElementById('dropZone');
 
-            // 센서 UI 생성
-            sensors.forEach(sensor => {
-              const container = document.createElement('div');
-              container.className = 'sensor-item';
+const activeCharts = {};
+const activeUpdates = {};
+const sensorData = {};
 
-              const checkbox = document.createElement('input');
-              checkbox.type = 'checkbox';
-              checkbox.id = `chk-${sensor.id}`;
-
-              const label = document.createElement('label');
-              label.htmlFor = `chk-${sensor.id}`;
-              label.textContent = ` ${sensor.name}`;
-
-              const header = document.createElement('div');
-              header.appendChild(checkbox);
-              header.appendChild(label);
-
-              const detail = document.createElement('div');
-              detail.className = 'sensor-details draggable';
-              detail.textContent = `${sensor.name} 상세정보`;
-              detail.draggable = true;
-              detail.style.display = 'none';
-              detail.dataset.sensorId = sensor.id;
-
-              // 드래그 설정
-              detail.addEventListener('dragstart', e => {
-                e.dataTransfer.setData('text/plain', sensor.id);
-              });
-
-              // 체크박스로 접기/펼치기
-              checkbox.addEventListener('change', () => {
-                detail.style.display = checkbox.checked ? 'block' : 'none';
-              });
-
-              container.appendChild(header);
-              container.appendChild(detail);
-              panel.appendChild(container);
-            });
-
-            // 드롭 이벤트 설정
-            dropZone.addEventListener('dragover', e => {
-              e.preventDefault();
-              dropZone.style.backgroundColor = '#e0f7ff';
-            });
-
-            dropZone.addEventListener('dragleave', () => {
-              dropZone.style.backgroundColor = 'white';
-            });
-
-            dropZone.addEventListener('drop', e => {
-              e.preventDefault();
-              dropZone.style.backgroundColor = 'white';
-
-              const sensorId = e.dataTransfer.getData('text/plain');
-              const sensor = sensors.find(s => s.id === sensorId);
-
-              if (sensor && !activeCharts[sensorId]) {
-                addSensorGraph(sensor);
-              }
-            });
-
-            // 그래프 추가 함수
-            function addSensorGraph(sensor) {
-              // 그래프 블록
-              const wrapper = document.createElement('div');
-              wrapper.className = 'graph-block';
-
-              const title = document.createElement('h4');
-              title.textContent = `📈 ${sensor.name} 실시간 그래프`;
-              wrapper.appendChild(title);
-
-              const canvas = document.createElement('canvas');
-              wrapper.appendChild(canvas);
-              dropZone.appendChild(wrapper);
-
-              const ctx = canvas.getContext('2d');
-
-              // 초기값
-              sensorData[sensor.id] = [];
-
-              // Chart 생성
-              const chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                  labels: [],
-                  datasets: [{
-                    label: `${sensor.name} (${sensor.unit})`,
-                    data: [],
-                    fill: false,
-                    borderColor: 'blue',
-                    tension: 0.1
-                  }]
-                },
-                options: {
-                  responsive: true,
-                  animation: false,
-                  scales: {
-                    x: {
-                      type: 'realtime',
-                      realtime: {
-                        delay: 2000,
-                        pause: false,
-                        refresh: 1000,
-                        onRefresh: chart => {
-                          chart.data.datasets[0].data.push({
-                            x: Date.now(),
-                            y: getSensorValue(sensor.id)
-                          });
-                        }
-                      }
-                    },
-                    y: {
-                      beginAtZero: true
-                    }
-                  },
-                  plugins: {
-                    legend: {
-                      display: true
-                    }
-                  }
-                }
-              });
-
-              activeCharts[sensor.id] = chart;
-            }
-
-            async function getSensorValue(sensorId) {
-  const res = await fetch(`http://localhost:8080/api/sensors/${sensorId}`);
-  const data = await res.json();
-  return data.value;
+// 예시 센서 목록 (실제 센서 연동 시 초기값은 비워두고, 나중에 데이터 수신 시 배열 업데이트 가능)
+for (let i = 1; i <= 5; i++) {
+    sensors.push({
+        id: i,
+        name: `센서 ${i}`,
+        temp: (20 + i).toFixed(1),
+        humi: (50 + i * 2).toFixed(1),
+        time: new Date().toLocaleTimeString()
+    });
 }
+
+// 센서 목록 렌더링 (상세정보 토글 포함)
+function renderSensorList() {
+    // 제목 제외하고 기존 리스트 모두 삭제
+    Array.from(panel.children).forEach(child => {
+        if (!child.matches('h3')) child.remove();
+    });
+
+    sensors.forEach(sensor => {
+        const sensorDiv = document.createElement('div');
+        sensorDiv.className = 'sensor-item draggable';
+        sensorDiv.setAttribute('draggable', 'true');
+        sensorDiv.dataset.id = sensor.id;
+
+        sensorDiv.innerHTML = `
+            <strong>${sensor.name}</strong>
+            <div class="sensor-details" style="display:none; margin-top: 5px;">
+                온도: ${sensor.temp} °C<br />
+                습도: ${sensor.humi} %<br />
+                측정 시간: ${sensor.time}
+            </div>
+        `;
+
+        // 드래그 시작 이벤트
+        sensorDiv.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', sensor.id);
+        });
+
+        // 클릭 시 상세정보 토글
+        sensorDiv.addEventListener('click', () => {
+            const details = sensorDiv.querySelector('.sensor-details');
+            if (details.style.display === 'block') {
+                details.style.display = 'none';
+            } else {
+                details.style.display = 'block';
             }
-        </script>
-    </body>
+        });
+
+        panel.appendChild(sensorDiv);
+    });
+}
+
+// 드롭존 이벤트 처리
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.backgroundColor = '#e3f2fd';
+});
+
+dropZone.addEventListener('dragleave', (e) => {
+    dropZone.style.backgroundColor = 'white';
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.backgroundColor = 'white';
+
+    const sensorId = e.dataTransfer.getData('text/plain');
+    if (!sensorId) return;
+
+    if (activeCharts[sensorId]) {
+        alert('이미 추가된 센서입니다.');
+        return;
+    }
+
+    const sensor = sensors.find(s => s.id == sensorId);
+    if (!sensor) return;
+
+    const updateFunc = addGraph(sensor);
+    activeUpdates[sensorId] = updateFunc;
+
+    // 센서 데이터 업데이트 시뮬레이션(실제 센서 연동 시 대체)
+    simulateSensorData(sensorId);
+});
+
+// 그래프 추가 함수
+function addGraph(sensor) {
+    const graphBlock = document.createElement('div');
+    graphBlock.className = 'graph-block';
+    graphBlock.id = `graph-${sensor.id}`;
+
+    graphBlock.innerHTML = `
+        <h4>${sensor.name}</h4>
+        <canvas id="chart-${sensor.id}" width="400" height="150"></canvas>
+        <button id="remove-${sensor.id}">그래프 제거</button>
+    `;
+
+    dropZone.appendChild(graphBlock);
+
+    sensorData[sensor.id] = {
+        labels: [],
+        temps: [],
+        humis: []
+    };
+
+    const ctx = document.getElementById(`chart-${sensor.id}`).getContext('2d');
+
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: sensorData[sensor.id].labels,
+            datasets: [
+                {
+                    label: '온도',
+                    data: sensorData[sensor.id].temps,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: false,
+                    tension: 0.1,
+                },
+                {
+                    label: '습도',
+                    data: sensorData[sensor.id].humis,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    fill: false,
+                    tension: 0.1,
+                }
+            ]
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'category',
+                    title: { display: true, text: '시간' }
+                },
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    activeCharts[sensor.id] = chart;
+
+    function updateChartData(time, temp, humi) {
+        const data = sensorData[sensor.id];
+        data.labels.push(time);
+        data.temps.push(temp);
+        data.humis.push(humi);
+
+        if (data.labels.length > 20) {
+            data.labels.shift();
+            data.temps.shift();
+            data.humis.shift();
+        }
+        chart.update();
+    }
+
+    // 그래프 제거 버튼 이벤트
+    document.getElementById(`remove-${sensor.id}`).addEventListener('click', () => {
+        chart.destroy();
+        delete activeCharts[sensor.id];
+        delete activeUpdates[sensor.id];
+        delete sensorData[sensor.id];
+
+        const graphBlock = document.getElementById(`graph-${sensor.id}`);
+        if (graphBlock) graphBlock.remove();
+
+        stopSimulateSensorData(sensor.id);
+    });
+
+    return updateChartData;
+}
+
+// (테스트용) 센서 데이터 시뮬레이션 — 실제 데이터 수신 시 해당 부분만 교체하세요.
+const simulationIntervals = {};
+
+function simulateSensorData(sensorId) {
+    if (simulationIntervals[sensorId]) return;
+
+    simulationIntervals[sensorId] = setInterval(() => {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString();
+        const temp = 20 + Math.random() * 10;
+        const humi = 40 + Math.random() * 20;
+
+        if (activeUpdates[sensorId]) {
+            activeUpdates[sensorId](timeStr, temp.toFixed(1), humi.toFixed(1));
+        }
+    }, 2000);
+}
+
+function stopSimulateSensorData(sensorId) {
+    if (simulationIntervals[sensorId]) {
+        clearInterval(simulationIntervals[sensorId]);
+        delete simulationIntervals[sensorId];
+    }
+}
+
+renderSensorList();
+</script>
+</body>
 </html>
