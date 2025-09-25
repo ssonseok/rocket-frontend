@@ -30,13 +30,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // 버튼 클릭 함수
 function modifyDevice(serial) {
-    location.href = `/deviceModify/deviceModify.html?serial=${serial}`;
+    location.href = `../deviceModify/deviceModify.html?serial=${serial}`;
 }
 
 function deleteDevice(serial) {
-    location.href = `/deviceDelete/deviceDelete.html?serial=${serial}`;
+    location.href = `../deviceDelete/deviceDelete.html?serial=${serial}`;
 }
 
 function statusDevice(serial) {
-    location.href = `/deviceStatus/deviceStatus.html?serial=${serial}`;
+    location.href = `../deviceStatus/deviceStatus.html?serial=${serial}`;
 }
