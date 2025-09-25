@@ -33,8 +33,33 @@ function modifyDevice(serial) {
     location.href = `../deviceModify/deviceModify.html?serial=${serial}`;
 }
 
-function deleteDevice(serial) {
-    location.href = `../deviceDelete/deviceDelete.html?serial=${serial}`;
+function deleteDevice(serial, name) {
+    if (confirm(`장치 "${name}" (시리얼: ${serial}) 을/를 정말 삭제하시겠습니까?`)) {
+        fetch("http://localhost:8080/api/device/delete", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                deviceSerialNumber: serial,
+                name: name
+            })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("삭제 실패");
+            return res.json();
+        })
+        .then(data => {
+            if (data.status === "success") {
+                alert("삭제 완료!");
+                location.reload(); // ✅ 목록 페이지 새로고침
+            } else {
+                alert("삭제 실패: " + (data.errorType || "알 수 없는 오류"));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("삭제 중 오류 발생!");
+        });
+    }
 }
 
 function statusDevice(serial) {
