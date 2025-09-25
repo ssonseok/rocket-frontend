@@ -1,10 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+  <meta charset="UTF-8">
+  <title>장치 수정</title>
 </head>
 <body>
+<h1>장치 수정 화면</h1>
 
+<div>
+  <label>시리얼번호:
+    <input type="text" id="deviceSerial" readonly style="background-color:#eee">
+  </label><br>
+  <label>장치명:
+    <input type="text" id="deviceName">
+  </label><br>
+  <label>IP:
+    <input type="text" id="deviceIP">
+  </label><br>
+  <label>Port:
+    <input type="number" id="devicePort">
+  </label><br>
+</div>
+
+<h2>센서 데이터</h2>
+<div id="dataSettings"></div>
+
+<button id="saveBtn">수정 저장</button>
+
+<script src="/deviceModify/deviceModify.js"></script>
 </body>
 </html>
+
