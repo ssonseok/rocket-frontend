@@ -241,211 +241,285 @@
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
 <script>
     const sensors = [];
-const panel = document.getElementById('sensorPanel');
-const dropZone = document.getElementById('dropZone');
+    const panel = document.getElementById('sensorPanel');
+    const dropZone = document.getElementById('dropZone');
 
-const activeCharts = {};
-const activeUpdates = {};
-const sensorData = {};
+    const activeCharts = {};
+    const activeUpdates = {};
+    const sensorData = {};
+    const simulationIntervals = {};
 
-// 예시 센서 목록 (실제 센서 연동 시 초기값은 비워두고, 나중에 데이터 수신 시 배열 업데이트 가능)
-for (let i = 1; i <= 5; i++) {
-    sensors.push({
-        id: i,
-        name: `센서 ${i}`,
-        temp: (20 + i).toFixed(1),
-        humi: (50 + i * 2).toFixed(1),
-        time: new Date().toLocaleTimeString()
-    });
-}
+    // 서버에서 센서 목록 가져오기
+    async function fetchSensorsFromServer() {
+        try {
+            const response = await fetch('http://localhost:8080/api/sensors');
+            if (!response.ok) throw new Error('서버 오류');
 
-// 센서 목록 렌더링 (상세정보 토글 포함)
-function renderSensorList() {
-    // 제목 제외하고 기존 리스트 모두 삭제
-    Array.from(panel.children).forEach(child => {
-        if (!child.matches('h3')) child.remove();
-    });
+            const rawData = await response.json();  // SensorResponseDTO[]
 
-    sensors.forEach(sensor => {
-        const sensorDiv = document.createElement('div');
-        sensorDiv.className = 'sensor-item draggable';
-        sensorDiv.setAttribute('draggable', 'true');
-        sensorDiv.dataset.id = sensor.id;
+            const groupedSensors = {};
+            rawData.forEach(item => {
+                const key = item.deviceSerial;
 
-        sensorDiv.innerHTML = `
-            <strong>${sensor.name}</strong>
-            <div class="sensor-details" style="display:none; margin-top: 5px;">
-                온도: ${sensor.temp} °C<br />
-                습도: ${sensor.humi} %<br />
-                측정 시간: ${sensor.time}
-            </div>
-        `;
-
-        // 드래그 시작 이벤트
-        sensorDiv.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('text/plain', sensor.id);
-        });
-
-        // 클릭 시 상세정보 토글
-        sensorDiv.addEventListener('click', () => {
-            const details = sensorDiv.querySelector('.sensor-details');
-            if (details.style.display === 'block') {
-                details.style.display = 'none';
-            } else {
-                details.style.display = 'block';
-            }
-        });
-
-        panel.appendChild(sensorDiv);
-    });
-}
-
-// 드롭존 이벤트 처리
-dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.style.backgroundColor = '#e3f2fd';
-});
-
-dropZone.addEventListener('dragleave', (e) => {
-    dropZone.style.backgroundColor = 'white';
-});
-
-dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.style.backgroundColor = 'white';
-
-    const sensorId = e.dataTransfer.getData('text/plain');
-    if (!sensorId) return;
-
-    if (activeCharts[sensorId]) {
-        alert('이미 추가된 센서입니다.');
-        return;
-    }
-
-    const sensor = sensors.find(s => s.id == sensorId);
-    if (!sensor) return;
-
-    const updateFunc = addGraph(sensor);
-    activeUpdates[sensorId] = updateFunc;
-
-    // 센서 데이터 업데이트 시뮬레이션(실제 센서 연동 시 대체)
-    simulateSensorData(sensorId);
-});
-
-// 그래프 추가 함수
-function addGraph(sensor) {
-    const graphBlock = document.createElement('div');
-    graphBlock.className = 'graph-block';
-    graphBlock.id = `graph-${sensor.id}`;
-
-    graphBlock.innerHTML = `
-        <h4>${sensor.name}</h4>
-        <canvas id="chart-${sensor.id}" width="400" height="150"></canvas>
-        <button id="remove-${sensor.id}">그래프 제거</button>
-    `;
-
-    dropZone.appendChild(graphBlock);
-
-    sensorData[sensor.id] = {
-        labels: [],
-        temps: [],
-        humis: []
-    };
-
-    const ctx = document.getElementById(`chart-${sensor.id}`).getContext('2d');
-
-    const chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: sensorData[sensor.id].labels,
-            datasets: [
-                {
-                    label: '온도',
-                    data: sensorData[sensor.id].temps,
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    fill: false,
-                    tension: 0.1,
-                },
-                {
-                    label: '습도',
-                    data: sensorData[sensor.id].humis,
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    fill: false,
-                    tension: 0.1,
+                if (!groupedSensors[key]) {
+                    groupedSensors[key] = {
+                        id: key,
+                        name: `장치 ${key}`,
+                        time: item.timestamp,
+                        values: []
+                    };
                 }
-            ]
-        },
-        options: {
-            scales: {
-                x: {
-                    type: 'category',
-                    title: { display: true, text: '시간' }
-                },
-                y: { beginAtZero: true }
+
+                groupedSensors[key].values.push({
+                    name: item.name,
+                    value: item.value,
+                    referenceValue: item.referenceValue
+                });
+            });
+
+            sensors.length = 0;
+            sensors.push(...Object.values(groupedSensors));
+
+            renderSensorList();
+        } catch (err) {
+            console.error('센서 데이터를 가져오는 중 오류 발생:', err);
+        }
+    }
+
+    // 센서 목록 렌더링
+    function renderSensorList() {
+        Array.from(panel.children).forEach(child => {
+            if (!child.matches('h3')) child.remove();
+        });
+
+        sensors.forEach(sensor => {
+            const sensorDiv = document.createElement('div');
+            sensorDiv.className = 'sensor-item draggable';
+            sensorDiv.setAttribute('draggable', 'true');
+            sensorDiv.dataset.id = sensor.id;
+
+            sensorDiv.innerHTML = `
+                <strong>${sensor.name}</strong>
+                <div class="sensor-details" style="display:none; margin-top: 5px;">
+                    ${
+                        Array.isArray(sensor.values)
+                            ? sensor.values.map(val => `${val.name}: ${val.value} (기준: ${val.referenceValue})`).join('<br />')
+                            : '센서 값 없음'
+                    }
+                    <br/>측정 시간: ${sensor.time}
+                </div>
+            `;
+
+            sensorDiv.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', sensor.id);
+            });
+
+            sensorDiv.addEventListener('click', () => {
+                const details = sensorDiv.querySelector('.sensor-details');
+                details.style.display = details.style.display === 'block' ? 'none' : 'block';
+            });
+
+            panel.appendChild(sensorDiv);
+        });
+    }
+
+    // 드롭존 이벤트
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.backgroundColor = '#e3f2fd';
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.style.backgroundColor = 'white';
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.backgroundColor = 'white';
+
+        const sensorId = e.dataTransfer.getData('text/plain');
+        if (!sensorId) return;
+
+        if (activeCharts[sensorId]) {
+            alert('이미 추가된 센서입니다.');
+            return;
+        }
+
+        const sensor = sensors.find(s => s.id == sensorId);
+        if (!sensor) return;
+
+        const updateFunc = addGraph(sensor);
+        activeUpdates[sensorId] = updateFunc;
+
+        simulateSensorData(sensorId);
+    });
+
+    // 그래프 추가 함수
+    function addGraph(sensor) {
+        const sensorId = sensor.id;
+
+        const graphBlock = document.createElement('div');
+        graphBlock.className = 'graph-block';
+        graphBlock.id = `graph-${sensorId}`;
+
+        graphBlock.innerHTML = `
+            <h4>${sensor.name}</h4>
+            <canvas id="chart-${sensorId}" width="400" height="150"></canvas>
+            <button id="remove-${sensorId}">그래프 제거</button>
+        `;
+        dropZone.appendChild(graphBlock);
+
+        // 데이터 초기화
+        sensorData[sensorId] = {
+            labels: [],
+            values: {}
+        };
+
+        sensor.values.forEach(val => {
+            sensorData[sensorId].values[val.name] = [];
+        });
+
+        const ctx = document.getElementById(`chart-${sensorId}`).getContext('2d');
+
+        // 데이터셋 생성 (값 + 기준값)
+        const datasets = [];
+        sensor.values.forEach((val, idx) => {
+            const color = getColor(idx);
+
+            // 실시간 값 라인
+            datasets.push({
+                label: `${val.name}`,
+                data: sensorData[sensorId].values[val.name],
+                borderColor: color,
+                backgroundColor: color + '33',
+                fill: false,
+                tension: 0.1
+            });
+
+            // 기준값 라인 (고정 값 배열)
+            datasets.push({
+                label: `${val.name} 기준값`,
+                data: [],
+                borderColor: color,
+                borderDash: [5, 5],
+                pointRadius: 0,
+                fill: false,
+                tension: 0.1
+            });
+        });
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: sensorData[sensorId].labels,
+                datasets: datasets
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'category',
+                        title: { display: true, text: '시간' }
+                    },
+                    y: { beginAtZero: true }
+                }
             }
+        });
+
+        activeCharts[sensorId] = chart;
+
+        // 데이터 업데이트 함수
+        function updateChartData(time, values) {
+            const data = sensorData[sensorId];
+            data.labels.push(time);
+
+            values.forEach(val => {
+                if (!data.values[val.name]) data.values[val.name] = [];
+                data.values[val.name].push(parseFloat(val.value));
+
+                if (data.values[val.name].length > 20) {
+                    data.values[val.name].shift();
+                }
+
+                // 기준값도 같이 shift
+                const refDataset = chart.data.datasets.find(ds => ds.label === `${val.name} 기준값`);
+                if (refDataset) {
+                    refDataset.data.push(parseFloat(val.referenceValue));
+                    if (refDataset.data.length > 20) refDataset.data.shift();
+                }
+            });
+
+            if (data.labels.length > 20) {
+                data.labels.shift();
+            }
+
+            chart.update();
         }
-    });
 
-    activeCharts[sensor.id] = chart;
+        // 제거 이벤트
+        document.getElementById(`remove-${sensorId}`).addEventListener('click', () => {
+            chart.destroy();
+            delete activeCharts[sensorId];
+            delete activeUpdates[sensorId];
+            delete sensorData[sensorId];
 
-    function updateChartData(time, temp, humi) {
-        const data = sensorData[sensor.id];
-        data.labels.push(time);
-        data.temps.push(temp);
-        data.humis.push(humi);
+            const graphBlock = document.getElementById(`graph-${sensorId}`);
+            if (graphBlock) graphBlock.remove();
 
-        if (data.labels.length > 20) {
-            data.labels.shift();
-            data.temps.shift();
-            data.humis.shift();
-        }
-        chart.update();
+            stopSimulateSensorData(sensorId);
+        });
+
+        return updateChartData;
     }
 
-    // 그래프 제거 버튼 이벤트
-    document.getElementById(`remove-${sensor.id}`).addEventListener('click', () => {
-        chart.destroy();
-        delete activeCharts[sensor.id];
-        delete activeUpdates[sensor.id];
-        delete sensorData[sensor.id];
+    // 시뮬레이션 데이터 생성
+    function simulateSensorData(sensorId) {
+        if (simulationIntervals[sensorId]) return;
 
-        const graphBlock = document.getElementById(`graph-${sensor.id}`);
-        if (graphBlock) graphBlock.remove();
+        simulationIntervals[sensorId] = setInterval(() => {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString();
 
-        stopSimulateSensorData(sensor.id);
-    });
+            const sensor = sensors.find(s => s.id == sensorId);
+            if (!sensor) return;
 
-    return updateChartData;
-}
+            const values = sensor.values.map(val => {
+                const fluctuation = (Math.random() - 0.5) * 5;
+                const newValue = Math.max(0, (val.referenceValue || 50) + fluctuation);
+                return {
+                    name: val.name,
+                    value: newValue.toFixed(1),
+                    referenceValue: val.referenceValue
+                };
+            });
 
-// (테스트용) 센서 데이터 시뮬레이션 — 실제 데이터 수신 시 해당 부분만 교체하세요.
-const simulationIntervals = {};
-
-function simulateSensorData(sensorId) {
-    if (simulationIntervals[sensorId]) return;
-
-    simulationIntervals[sensorId] = setInterval(() => {
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString();
-        const temp = 20 + Math.random() * 10;
-        const humi = 40 + Math.random() * 20;
-
-        if (activeUpdates[sensorId]) {
-            activeUpdates[sensorId](timeStr, temp.toFixed(1), humi.toFixed(1));
-        }
-    }, 2000);
-}
-
-function stopSimulateSensorData(sensorId) {
-    if (simulationIntervals[sensorId]) {
-        clearInterval(simulationIntervals[sensorId]);
-        delete simulationIntervals[sensorId];
+            if (activeUpdates[sensorId]) {
+                activeUpdates[sensorId](timeStr, values);
+            }
+        }, 2000);
     }
-}
 
-renderSensorList();
+    function stopSimulateSensorData(sensorId) {
+        if (simulationIntervals[sensorId]) {
+            clearInterval(simulationIntervals[sensorId]);
+            delete simulationIntervals[sensorId];
+        }
+    }
+
+    // 색상 매핑 함수
+    function getColor(i) {
+        const colors = [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)'
+        ];
+        return colors[i % colors.length];
+    }
+
+    // 실행
+    fetchSensorsFromServer();
 </script>
 </body>
 </html>
