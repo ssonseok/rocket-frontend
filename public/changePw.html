@@ -71,13 +71,15 @@
                     return;
                 }
 
+                // 사용자에게 처리 시간에 대한 안내 메시지
+                alert('요청을 처리하는 데 10초에서 20초 정도 걸릴 수 있습니다.');
+
                 try {
                     const response = await fetch('http://localhost:8080/api/changePw', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        // 여기서 id와 email 키를 맞춰서 보냅니다.
                         body: JSON.stringify({ id: username, email: email })
                     });
 
@@ -87,7 +89,6 @@
 
                     const data = await response.json();
 
-                    // 백엔드 응답이 status: 'success' 인지 확인
                     if (data.status === 'success') {
                         alert('입력하신 이메일로 비밀번호 변경 링크가 전송되었습니다.');
                         window.location.href = '/login.html';

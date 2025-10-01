@@ -18,7 +18,7 @@
                         <div class="row justify-content-center">
                             <div class="col-lg-5">
                                 <div class="card shadow-lg border-0 rounded-lg mt-5">
-                                    <div class="card-header"><h3 class="text-center font-weight-light my-4">Password Recovery</h3></div>
+                                    <div class="card-header"><h3 class="text-center font-weight-light my-4">Find ID</h3></div>
                                     <div class="card-body">
                                         <div class="small mb-3 text-muted">이메일을 입력해주시면 이메일로 아이디를 보내드립니다.</div>
                                         <form id="findIdForm">
@@ -66,6 +66,9 @@
                     return;
                 }
 
+                // 사용자에게 처리 시간에 대한 경고 표시
+                alert('10초에서 20초 정도 걸릴 수 있습니다.');
+
                 try {
                     const response = await fetch('http://localhost:8080/api/findId', {
                         method: 'POST',
@@ -93,5 +96,6 @@
                 }
             });
         </script>
+
     </body>
 </html>
