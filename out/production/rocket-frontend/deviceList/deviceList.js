@@ -34,17 +34,26 @@ function modifyDevice(serial) {
 }
 
 function deleteDevice(serial, name) {
-    if (confirm(`장치 "${name || serial}" (시리얼: ${serial}) 을/를 정말 삭제하시겠습니까?`)) {
-        fetch(`http://localhost:8080/api/device/delete?deviceSerialNumber=${serial}`, {
-            method: "DELETE"
+    if (confirm(`장치 "${name}" (시리얼: ${serial}) 을/를 정말 삭제하시겠습니까?`)) {
+        fetch("http://localhost:8080/api/device/delete", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                deviceSerialNumber: serial,
+                name: name
+            })
         })
         .then(res => {
             if (!res.ok) throw new Error("삭제 실패");
-            return res.text(); // 서비스에서 문자열 반환
+            return res.json();
         })
-        .then(msg => {
-            alert("삭제 완료!");
-            location.reload();
+        .then(data => {
+            if (data.status === "success") {
+                alert("삭제 완료!");
+                location.reload();
+            } else {
+                alert("삭제 실패: " + (data.errorType || "알 수 없는 오류"));
+            }
         })
         .catch(err => {
             console.error(err);
