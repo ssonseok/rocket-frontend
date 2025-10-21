@@ -64,7 +64,7 @@
                 e.preventDefault();
 
                 const userid = document.getElementById('inputEmail').value.trim();
-const pw = document.getElementById('inputPassword').value.trim();
+                const pw = document.getElementById('inputPassword').value.trim();
 
                 if (!userid || !pw) {
                     alert('아이디와 비밀번호를 입력해주세요.');
@@ -73,10 +73,10 @@ const pw = document.getElementById('inputPassword').value.trim();
 
                 try {
                     const response = await fetch('http://localhost:8080/api/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userid, pw })  // 키 이름 맞춤
-});
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userid, pw })
+                    });
 
                     if (!response.ok) {
                         throw new Error('서버 오류: ' + response.status);
@@ -85,10 +85,14 @@ const pw = document.getElementById('inputPassword').value.trim();
                     const data = await response.json();
 
                     if (data.status === 'success') {
-    window.location.href = '/index.html';
-} else {
-    alert(data.message || '로그인 실패: 아이디 또는 비밀번호가 올바르지 않습니다.');
-}
+                        // ✅ 토큰을 저장
+                        localStorage.setItem('token', data.token);
+
+                        // ✅ 메인 페이지로 이동
+                        window.location.href = '/index.html';
+                    } else {
+                        alert(data.message || '로그인 실패: 아이디 또는 비밀번호가 올바르지 않습니다.');
+                    }
                 } catch (error) {
                     console.error('로그인 오류:', error);
                     alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');

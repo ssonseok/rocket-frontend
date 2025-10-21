@@ -221,17 +221,34 @@
 
     // --- API 호출 함수 ---
 
+    const getAuthHeaders = () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('로그인이 필요합니다.');
+            throw new Error('No JWT token found');
+        }
+        return {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+    };
+
     const fetchSensors = () => {
-        fetch(`${API_BASE}/sensors`)
-            .then(res => res.json())
-            .then(data => {
-                sensors = data;
-                fetchHistory(); // 센서 목록 받은 뒤 기본 히스토리 조회
-            })
-            .catch(err => {
-                console.error("Failed to fetch sensors:", err);
-                alert("센서 목록을 불러오는 데 실패했습니다.");
-            });
+        fetch(`${API_BASE}/sensors`, {
+            headers: getAuthHeaders()
+        })
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            sensors = data;
+            fetchHistory(); // 센서 목록 받은 뒤 기본 히스토리 조회
+        })
+        .catch(err => {
+            console.error("Failed to fetch sensors:", err);
+            alert("센서 목록을 불러오는 데 실패했습니다.");
+        });
     };
 
     const buildHistoryRequest = (sensorIds, startISO, endISO, unit) => {
@@ -251,29 +268,29 @@
     };
 
     const fetchHistory = () => {
-    const selectedIds = sensors.map(s => s.sensorId);
-    const today = new Date().toISOString().slice(0, 10);
-    const requestBody = buildHistoryRequest(selectedIds, today, today, currentUnit);
+        const selectedIds = sensors.map(s => s.sensorId);
+        const today = new Date().toISOString().slice(0, 10);
+        const requestBody = buildHistoryRequest(selectedIds, today, today, currentUnit);
 
-    fetch(`${API_BASE}/history`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody)
-    })
-    .then(res => {
-        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
-        return res.json();
-    })
-    .then(data => {
-        if (!data.y || !data.data) throw new Error("Invalid history response format");
-        parseUnitData(data);
-        renderSensorOptions();
-    })
-    .catch(err => {
-        console.error("Failed to fetch history data:", err);
-        alert("히스토리 데이터를 불러오는 데 실패했습니다.");
-    });
-};
+        fetch(`${API_BASE}/history`, {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify(requestBody)
+        })
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            if (!data.y || !data.data) throw new Error("Invalid history response format");
+            parseUnitData(data);
+            renderSensorOptions();
+        })
+        .catch(err => {
+            console.error("Failed to fetch history data:", err);
+            alert("히스토리 데이터를 불러오는 데 실패했습니다.");
+        });
+    };
 
     async function loadChartData(sensorIds, startISO, endISO, unit) {
         try {
@@ -288,7 +305,7 @@
                 };
                 return fetch(`${API_BASE}/history`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: getAuthHeaders(),
                     body: JSON.stringify(body)
                 })
                 .then(r => {
@@ -515,20 +532,19 @@
     };
 
     function onLoadChartClick() {
-    const sensorIds = getSelectedSensorIds();
-    if (!validateSelection(sensorIds)) return;
+        const sensorIds = getSelectedSensorIds();
+        if (!validateSelection(sensorIds)) return;
 
-    const sd = document.getElementById("startDate").value;
-    const ed = document.getElementById("endDate").value;
+        const sd = document.getElementById("startDate").value;
+        const ed = document.getElementById("endDate").value;
 
-    if (new Date(sd) > new Date(ed)) {
-        alert("시작일이 종료일보다 늦을 수 없습니다.");
-        return;
+        if (new Date(sd) > new Date(ed)) {
+            alert("시작일이 종료일보다 늦을 수 없습니다.");
+            return;
+        }
+
+        loadChartData(sensorIds, sd, ed, currentUnit);
     }
-
-    // 변환 없이 그대로 전달
-    loadChartData(sensorIds, sd, ed, currentUnit);
-}
 
     function initDateInputs() {
         const today = new Date().toISOString().slice(0, 10);
