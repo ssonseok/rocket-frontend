@@ -192,6 +192,7 @@
     let myChart = null;
     let unitMap = {};
     let sensorUnitMap = {};
+    let currentUnit = "DAILY";
 
     window.onload = () => {
         fetchSensors();
@@ -199,44 +200,115 @@
         document.getElementById("loadChartBtn").addEventListener("click", onLoadChartClick);
     };
 
-    // 1. 센서 목록 가져오기
-    function fetchSensors() {
+    // --- 유틸 함수 ---
+
+    const toLocalDateString = dateStr => {
+        const d = new Date(dateStr);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const groupSensorIdsByUnit = sensorIds => {
+        return sensorIds.reduce((acc, id) => {
+            const sensor = sensors.find(s => s.sensorId === id);
+            if (!sensor) return acc;
+            (acc[sensor.unitId] = acc[sensor.unitId] || []).push(sensor.sensorId);
+            return acc;
+        }, {});
+    };
+
+    // --- API 호출 함수 ---
+
+    const fetchSensors = () => {
         fetch(`${API_BASE}/sensors`)
             .then(res => res.json())
             .then(data => {
                 sensors = data;
-                fetchHistory(); // 센서 목록 받은 뒤 기본 히스토리 호출
+                fetchHistory(); // 센서 목록 받은 뒤 기본 히스토리 조회
             })
             .catch(err => {
-                console.error("센서 목록 불러오기 실패:", err);
+                console.error("Failed to fetch sensors:", err);
                 alert("센서 목록을 불러오는 데 실패했습니다.");
             });
+    };
+
+    const buildHistoryRequest = (sensorIds, startISO, endISO, unit) => {
+        const grouped = groupSensorIdsByUnit(sensorIds);
+
+        const y = Object.entries(grouped).map(([unitId, ids]) => ({
+            unitId: parseInt(unitId),
+            sensorIds: ids
+        }));
+
+        return {
+            startDate: startISO,
+            endDate: endISO,
+            unit,
+            y
+        };
+    };
+
+    const fetchHistory = () => {
+    const selectedIds = sensors.map(s => s.sensorId);
+    const today = new Date().toISOString().slice(0, 10);
+    const requestBody = buildHistoryRequest(selectedIds, today, today, currentUnit);
+
+    fetch(`${API_BASE}/history`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody)
+    })
+    .then(res => {
+        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+        return res.json();
+    })
+    .then(data => {
+        if (!data.y || !data.data) throw new Error("Invalid history response format");
+        parseUnitData(data);
+        renderSensorOptions();
+    })
+    .catch(err => {
+        console.error("Failed to fetch history data:", err);
+        alert("히스토리 데이터를 불러오는 데 실패했습니다.");
+    });
+};
+
+    async function loadChartData(sensorIds, startISO, endISO, unit) {
+        try {
+            const grouped = groupSensorIdsByUnit(sensorIds);
+
+            const fetches = Object.entries(grouped).map(([unitId, ids]) => {
+                const body = {
+                    startDate: startISO,
+                    endDate: endISO,
+                    unit,
+                    y: [{ unitId: parseInt(unitId), sensorIds: ids }]
+                };
+                return fetch(`${API_BASE}/history`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                })
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP error: ${r.status}`);
+                    return r.json();
+                });
+            });
+
+            const responses = await Promise.all(fetches);
+            const merged = mergeHistoryResponses(responses);
+            renderChartDataFromResponse(merged);
+        } catch (err) {
+            console.error("차트 데이터 병렬 요청 실패:", err);
+            alert("차트 데이터를 불러오는 데 실패했습니다.");
+        }
     }
 
-    // 2. 초기 히스토리 데이터 요청
-    function fetchHistory() {
-        const selectedIds = sensors.map(s => s.sensorId);
-        const today = new Date().toISOString().slice(0, 10);
-        const requestBody = buildHistoryRequest(selectedIds, today, today);
+    // --- 데이터 파싱 및 렌더링 ---
 
-        fetch(`${API_BASE}/history`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody)
-        })
-        .then(res => res.json())
-        .then(data => {
-            parseUnitData(data);
-            renderSensorOptions();
-        })
-        .catch(err => {
-            console.error("히스토리 데이터 불러오기 실패:", err);
-            alert("히스토리 데이터를 불러오는 데 실패했습니다.");
-        });
-    }
-
-    // 3. 유닛 정보 파싱
-    function parseUnitData(historyData) {
+    const parseUnitData = historyData => {
         unitMap = {};
         sensorUnitMap = {};
 
@@ -244,279 +316,256 @@
             unitMap[unitInfo.unitId] = unitInfo.name;
         });
 
-        for (const group of historyData.data) {
-            for (const sensorValue of group.values) {
-                sensorUnitMap[sensorValue.sensorId] = sensorValue.unitId;
-            }
-        }
-    }
+        historyData.data.forEach(group => {
+            group.values.forEach(v => {
+                sensorUnitMap[v.sensorId] = v.unitId;
+            });
+        });
+    };
 
-    // 4. 센서 옵션 렌더링
-    function renderSensorOptions() {
+    const renderSensorOptions = () => {
         const select = document.getElementById("sensor-select");
         if (!select) return;
 
         select.innerHTML = "";
-
         sensors.forEach(sensor => {
-            const option = document.createElement("option");
-            option.value = sensor.sensorId;
+            const opt = document.createElement("option");
+            opt.value = sensor.sensorId;
+            const uId = sensorUnitMap[sensor.sensorId] || sensor.unitId;
+            const uName = unitMap[uId] || "단위없음";
+            opt.text = `${sensor.name} (${uName})`;
+            select.appendChild(opt);
+        });
+    };
 
-            const unitId = sensorUnitMap[sensor.sensorId] || sensor.unitId;
-            const unitName = unitMap[unitId] || "단위없음";
+    function mergeHistoryResponses(responses) {
+        const merged = { y: [], data: [] };
+        const unitSet = new Set();
+        const dataMap = new Map();
 
-            option.text = `${sensor.name} (${unitName})`;
-            select.appendChild(option);
+        for (const res of responses) {
+            res.y.forEach(u => {
+                if (!unitSet.has(u.unitId)) {
+                    unitSet.add(u.unitId);
+                    merged.y.push(u);
+                }
+            });
+            res.data.forEach(entry => {
+                const ts = entry.timestamp;
+                if (!ts) return;
+                if (!dataMap.has(ts)) {
+                    dataMap.set(ts, { timestamp: ts, values: [] });
+                }
+                if (Array.isArray(entry.values)) {
+                    dataMap.get(ts).values.push(...entry.values);
+                }
+            });
+        }
+
+        merged.data = Array.from(dataMap.values()).sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+        return merged;
+    }
+
+    function renderChartDataFromResponse(response) {
+        const localUnitMap = {};
+        response.y.forEach(u => {
+            localUnitMap[u.unitId] = u.name;
+        });
+
+        const sensorData = {};
+        const referenceMap = {};
+
+        response.data.forEach(group => {
+            const dateKey = new Date(group.timestamp).toISOString().slice(0, 10);
+            group.values.forEach(v => {
+                if (!sensorData[v.sensorId]) sensorData[v.sensorId] = {};
+                if (!sensorData[v.sensorId][dateKey]) sensorData[v.sensorId][dateKey] = [];
+                sensorData[v.sensorId][dateKey].push(v.value);
+
+                referenceMap[v.sensorId] = v.referenceValue ?? 0;
+            });
+        });
+
+        // 날짜 리스트 생성 및 정렬
+        const allDates = new Set();
+        Object.values(sensorData).forEach(dm => {
+            Object.keys(dm).forEach(d => allDates.add(d));
+        });
+        const timestamps = [...allDates].sort();
+
+        // 센서별 평균값 계산
+        const sensorAvg = {};
+        Object.entries(sensorData).forEach(([sid, dm]) => {
+            sensorAvg[sid] = timestamps.map(d => {
+                const arr = dm[d];
+                if (!arr || arr.length === 0) return null;
+                return arr.reduce((sum, v) => sum + v, 0) / arr.length;
+            });
+        });
+
+        const sIds = Object.keys(sensorAvg).map(Number);
+        const unitIds = [...new Set(sIds.map(id => sensors.find(s => s.sensorId === id)?.unitId))];
+
+        // yAxis ID 매핑 (최대 2개 단위 지원)
+        const axisMap = {};
+        if (unitIds[0] != null) axisMap[unitIds[0]] = "y1";
+        if (unitIds[1] != null) axisMap[unitIds[1]] = "y2";
+
+        const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+        const datasets = sIds.flatMap((sid, idx) => {
+            const sensor = sensors.find(s => s.sensorId === sid);
+            const uId = sensor?.unitId;
+            const uName = localUnitMap[uId] || "단위없음";
+
+            const avgSeries = {
+                label: `${sensor?.name || 'Unknown'} (${uName})`,
+                data: sensorAvg[sid],
+                fill: true,
+                borderColor: colors[idx % colors.length],
+                backgroundColor: colors[idx % colors.length] + '66',
+                spanGaps: true,
+                yAxisID: axisMap[uId] || "y1"
+            };
+
+            const refV = referenceMap[sid];
+            const refSeries = refV !== undefined ? {
+                label: `${sensor?.name || 'Unknown'} 기준값 (${uName})`,
+                data: timestamps.map(() => refV),
+                borderColor: colors[idx % colors.length],
+                borderDash: [10, 5],
+                fill: false,
+                pointRadius: 0,
+                yAxisID: axisMap[uId] || "y1"
+            } : [];
+
+            return [avgSeries, refSeries].flat();
+        });
+
+        // y축 min/max 계산
+        function calcMinMax(axis) {
+            const vals = datasets
+                .filter(ds => ds.yAxisID === axis)
+                .flatMap(ds => ds.data)
+                .filter(v => v != null);
+            if (vals.length === 0) return [0, 1];
+            return [Math.min(...vals) * 0.9, Math.max(...vals) * 1.1];
+        }
+
+        const scales = {
+            x: { display: true, title: { display: true, text: "날짜" } },
+            y1: {
+                type: "linear",
+                display: true,
+                position: "left",
+                title: { display: true, text: localUnitMap[unitIds[0]] || "값" },
+                min: calcMinMax("y1")[0],
+                max: calcMinMax("y1")[1]
+            }
+        };
+
+        if (unitIds[1] != null) {
+            scales.y2 = {
+                type: "linear",
+                display: true,
+                position: "right",
+                title: { display: true, text: localUnitMap[unitIds[1]] || "값" },
+                grid: { drawOnChartArea: false },
+                min: calcMinMax("y2")[0],
+                max: calcMinMax("y2")[1]
+            };
+        }
+
+        const ctx = document.getElementById("myAreaChart").getContext("2d");
+        if (myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: "line",
+            data: { labels: timestamps, datasets },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: "top" },
+                    tooltip: { mode: "index", intersect: false }
+                },
+                interaction: { mode: "nearest", axis: "x", intersect: false },
+                scales
+            }
         });
     }
 
-    // 5. 날짜 입력 기본값 세팅
+    // --- 이벤트 핸들러 및 기타 ---
+
+    const getSelectedSensorIds = () => {
+        const sel = document.getElementById("sensor-select");
+        return Array.from(sel.selectedOptions).map(opt => Number(opt.value));
+    };
+
+    const validateSelection = sensorIds => {
+        if (sensorIds.length === 0) {
+            alert("센서를 하나 이상 선택해주세요.");
+            return false;
+        }
+        const units = new Set(
+            sensorIds.map(id => sensors.find(s => s.sensorId === id)?.unitId).filter(u => u != null)
+        );
+        if (units.size > 2) {
+            alert("서로 다른 단위의 센서는 2개까지만 선택 가능합니다.");
+            return false;
+        }
+        return true;
+    };
+
+    function onLoadChartClick() {
+    const sensorIds = getSelectedSensorIds();
+    if (!validateSelection(sensorIds)) return;
+
+    const sd = document.getElementById("startDate").value;
+    const ed = document.getElementById("endDate").value;
+
+    if (new Date(sd) > new Date(ed)) {
+        alert("시작일이 종료일보다 늦을 수 없습니다.");
+        return;
+    }
+
+    // 변환 없이 그대로 전달
+    loadChartData(sensorIds, sd, ed, currentUnit);
+}
+
     function initDateInputs() {
         const today = new Date().toISOString().slice(0, 10);
         document.getElementById("startDate").value = today;
         document.getElementById("endDate").value = today;
     }
 
-    // 6. 히스토리 요청 바디 구성
-    function buildHistoryRequest(sensorIds, startDate, endDate) {
-        const grouped = {};
-
-        sensorIds.forEach(id => {
-            const sensor = sensors.find(s => s.sensorId === id);
-            if (!sensor) return;
-            if (!grouped[sensor.unitId]) {
-                grouped[sensor.unitId] = [];
-            }
-            grouped[sensor.unitId].push(sensor.sensorId);
-        });
-
-        const y = Object.entries(grouped).map(([unitId, sensorIds]) => ({
-            unitId: parseInt(unitId),
-            sensorIds
-        }));
-
-        return {
-            startDate,
-            endDate,
-            unit: "DAILY",
-            y
-        };
-    }
-
-    // 7. 선택된 센서 ID 가져오기
-    function getSelectedSensorIds() {
-        const select = document.getElementById("sensor-select");
-        return Array.from(select.selectedOptions).map(opt => Number(opt.value));
-    }
-
-    // 8. 선택 유효성 검사
-    function validateSelection(sensorIds) {
-        if (sensorIds.length === 0) {
-            alert("센서를 하나 이상 선택해주세요.");
-            return false;
-        }
-
-        const selectedUnits = new Set(
-            sensorIds.map(id => {
-                const sensor = sensors.find(s => s.sensorId === id);
-                return sensor ? sensor.unitId : null;
-            })
-        );
-
-        if (selectedUnits.size > 2) {
-            alert("서로 다른 단위의 센서는 2개까지만 선택 가능합니다.");
-            return false;
-        }
-
-        return true;
-    }
-
-    // 9. 차트 데이터 불러오기
-    function loadChartData(sensorIds, startDate, endDate) {
-        const requestBody = buildHistoryRequest(sensorIds, startDate, endDate);
-
-        fetch(`${API_BASE}/history`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(requestBody)
-        })
-        .then(res => {
-            if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
-            return res.json();
-        })
-        .then(data => {
-            renderChartDataFromResponse(data);
-        })
-        .catch(err => {
-            console.error("차트 데이터 불러오기 실패:", err);
-            alert("차트 데이터를 불러오는 데 실패했습니다.");
-        });
-    }
-
-    // 10. 버튼 클릭 시 차트 로딩
-    function onLoadChartClick() {
-        const sensorIds = getSelectedSensorIds();
-        if (!validateSelection(sensorIds)) return;
-
-        const startDate = document.getElementById("startDate").value;
-        const endDate = document.getElementById("endDate").value;
-
-        if (new Date(startDate) > new Date(endDate)) {
-            alert("시작일이 종료일보다 늦을 수 없습니다.");
-            return;
-        }
-
-        loadChartData(sensorIds, startDate, endDate);
-    }
-
-    // 11. 차트 데이터 렌더링
-function renderChartDataFromResponse(response) {
-    const unitMapLocal = {};
-    response.y.forEach(unitInfo => {
-        unitMapLocal[unitInfo.unitId] = unitInfo.name;
-    });
-
-    const timestamps = response.data.map(d => d.timestamp).sort();
-
-    const sensorDataMap = {};
-    const referenceValueMap = {};  // sensorId별 기준값 저장용
-
-    response.data.forEach(group => {
-        group.values.forEach(v => {
-            if (!sensorDataMap[v.sensorId]) {
-                sensorDataMap[v.sensorId] = [];
-            }
-            sensorDataMap[v.sensorId].push({ timestamp: group.timestamp, value: v.value });
-
-            // 기준값 저장 (동일 센서 기준값이 여러면 나중 값 덮어씀)
-            referenceValueMap[v.sensorId] = v.referenceValue || 0;
-        });
-    });
-
-    const sensorIds = Object.keys(sensorDataMap).map(Number);
-
-    // 단위별로 Y축을 나누기 위한 매핑
-    const unitIds = Array.from(new Set(sensorIds.map(id => {
-        const sensor = sensors.find(s => s.sensorId === id);
-        return sensor?.unitId;
-    })));
-
-    const axisMap = {};
-    if (unitIds.length > 0) axisMap[unitIds[0]] = "y1";
-    if (unitIds.length > 1) axisMap[unitIds[1]] = "y2";
-
-    const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
-
-    // 센서 실제 데이터 시리즈
-    const datasets = sensorIds.map((id, idx) => {
-        const sensor = sensors.find(s => s.sensorId === id);
-        const unitId = sensor?.unitId;
-        const unitName = unitMapLocal[unitId] || "단위없음";
-
-        const dataPoints = timestamps.map(t => {
-            const match = sensorDataMap[id].find(dp => dp.timestamp === t);
-            return match ? match.value : null;
-        });
-
-        return {
-            label: `${sensor?.name || 'Unknown'} (${unitName})`,
-            data: dataPoints,
-            fill: true,
-            borderColor: colors[idx % colors.length],
-            backgroundColor: colors[idx % colors.length] + '66',
-            spanGaps: true,
-            yAxisID: axisMap[unitId] || "y1"
-        };
-    });
-
-    // 기준값 선 시리즈 추가
-    sensorIds.forEach((id, idx) => {
-        const sensor = sensors.find(s => s.sensorId === id);
-        const unitId = sensor?.unitId;
-        const unitName = unitMapLocal[unitId] || "단위없음";
-        const refValue = referenceValueMap[id];
-        if (refValue === undefined) return;
-
-        const refData = timestamps.map(() => refValue);
-
-        datasets.push({
-            label: `${sensor?.name || 'Unknown'} 기준값 (${unitName})`,
-            data: refData,
-            borderColor: colors[idx % colors.length],
-            borderDash: [10,5],
-            fill: false,
-            pointRadius: 0,
-            yAxisID: axisMap[unitId] || "y1",
-            // tooltip에서 값 표시 방지 가능
-            // skipNull: true,
-        });
-    });
-
-    const ctx = document.getElementById("myAreaChart").getContext("2d");
-    if (myChart) myChart.destroy();
-
-    myChart = new Chart(ctx, {
-        type: "line",
-        data: {
-            labels: timestamps,
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: "top" },
-                tooltip: { mode: "index", intersect: false }
-            },
-            interaction: {
-                mode: "nearest",
-                axis: "x",
-                intersect: false
-            },
-            scales: {
-                x: {
-                    display: true,
-                    title: { display: true, text: "시간" }
-                },
-                y1: {
-                    type: "linear",
-                    display: true,
-                    position: "left",
-                    title: { display: true, text: unitMapLocal[unitIds[0]] || "값" },
-                    min: Math.min(...datasets.flatMap(ds => ds.yAxisID === "y1" ? ds.data.filter(d => d != null) : [])) * 0.9,
-                    max: Math.max(...datasets.flatMap(ds => ds.yAxisID === "y1" ? ds.data.filter(d => d != null) : [])) * 1.1,
-                },
-                y2: unitIds.length > 1 ? {
-                    type: "linear",
-                    display: true,
-                    position: "right",
-                    title: { display: true, text: unitMapLocal[unitIds[1]] || "값" },
-                    grid: { drawOnChartArea: false },
-                    min: Math.min(...datasets.flatMap(ds => ds.yAxisID === "y2" ? ds.data.filter(d => d != null) : [])) * 0.9,
-                    max: Math.max(...datasets.flatMap(ds => ds.yAxisID === "y2" ? ds.data.filter(d => d != null) : [])) * 1.1,
-                } : undefined
-            }
-        }
-    });
-}
-
-    // 12. 기간 버튼 설정
     function setRange(range) {
         const end = new Date();
         const start = new Date();
 
         switch (range) {
-            case "daily": break;
-            case "week": start.setDate(end.getDate() - 7); break;
-            case "month": start.setMonth(end.getMonth() - 1); break;
-            case "year": start.setFullYear(end.getFullYear() - 1); break;
-            default: return;
+            case "daily":
+                currentUnit = "DAILY";
+                break;
+            case "week":
+                start.setDate(end.getDate() - 7);
+                currentUnit = "WEEKLY";
+                break;
+            case "month":
+                start.setMonth(end.getMonth() - 1);
+                currentUnit = "MONTHLY";
+                break;
+            case "year":
+                start.setFullYear(end.getFullYear() - 1);
+                currentUnit = "YEARLY";
+                break;
+            default:
+                return;
         }
 
         document.getElementById("startDate").value = start.toISOString().slice(0, 10);
         document.getElementById("endDate").value = end.toISOString().slice(0, 10);
+
+        onLoadChartClick();
     }
 
-    // 13. 사용자 정의 기간 적용
     function setCustomRange() {
         onLoadChartClick();
     }

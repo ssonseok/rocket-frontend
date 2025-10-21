@@ -241,24 +241,28 @@
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
 <script>
     const MAX_POINTS = 20;
-    const FETCH_INTERVAL_MS = 2000;
+    const FETCH_INTERVAL_MS = 1000;
 
     const sensors = [];
     const panel = document.getElementById('sensorPanel');
     const dropZone = document.getElementById('dropZone');
 
     const activeCharts = {};
-    const activeUpdates = {};
     const sensorData = {};
     const fetchIntervals = {};
+    const activeUpdates = {};
+    const lastUpdateTimestamps = {};
+    const restartCheckIntervals = {};
 
+    let expandedSensorId = null;
+
+    // ------------- 초기화 -------------
     async function initialize() {
       await loadSensors();
       restoreSavedGraphs();
     }
 
-    // ------------------------- 센서 목록 ----------------------------
-
+    // ------------- 센서 목록 로딩 -------------
     async function loadSensors() {
       try {
         const res = await fetch('http://localhost:8080/api/sensors');
@@ -266,23 +270,21 @@
 
         const data = await res.json();
         sensors.length = 0;
-        data.forEach(item => {
-          sensors.push({
-            deviceSerial: item.deviceSerial,
-            sensorId: item.sensorId,
-            sensorName: item.name,
-            value: item.value,
-            referenceValue: item.referenceValue,
-            timestamp: item.timestamp,
-          });
-        });
-
+        data.forEach(item => sensors.push({
+          deviceSerial: item.deviceSerial,
+          sensorId: item.sensorId,
+          sensorName: item.name,
+          value: item.value,
+          referenceValue: item.referenceValue,
+          timestamp: item.timestamp,
+        }));
         renderSensorList();
       } catch (err) {
         console.error('센서 목록 로딩 실패:', err);
       }
     }
 
+    // ------------- 센서 리스트 렌더링 -------------
     function renderSensorList() {
       [...panel.children].forEach(child => {
         if (!child.matches('h3')) child.remove();
@@ -290,36 +292,200 @@
 
       sensors.forEach(sensor => {
         const dragId = getDragId(sensor);
-        const sensorDiv = document.createElement('div');
-        sensorDiv.className = 'sensor-item draggable';
-        sensorDiv.setAttribute('draggable', 'true');
-        sensorDiv.dataset.id = dragId;
-
-        sensorDiv.innerHTML = `
-          <strong>${sensor.deviceSerial} - ${sensor.sensorName}</strong>
-          <div class="sensor-details" style="display:none; margin-top: 5px;">
-            값: ${sensor.value} (기준: ${sensor.referenceValue})<br/>
-            측정 시간: ${sensor.timestamp}
-          </div>
-        `;
-
-        sensorDiv.addEventListener('dragstart', handleDragStart);
-        sensorDiv.addEventListener('click', toggleDetails);
+        const sensorDiv = createSensorItem(sensor, dragId);
         panel.appendChild(sensorDiv);
       });
     }
 
-    function handleDragStart(e) {
-      e.dataTransfer.setData('text/plain', e.currentTarget.dataset.id);
+    // 센서 아이템 DOM 생성
+    function createSensorItem(sensor, dragId) {
+      const div = document.createElement('div');
+      div.className = 'sensor-item draggable';
+      div.setAttribute('draggable', 'true');
+      div.dataset.id = dragId;
+
+      Object.assign(div.style, {
+        cursor: 'pointer',
+        padding: '10px',
+        border: '1px solid #ccc',
+        marginBottom: '8px',
+        borderRadius: '5px',
+        backgroundColor: 'white',
+        transition: 'all 0.3s ease',
+      });
+
+      div.innerHTML = `<strong>${sensor.deviceSerial} - ${sensor.sensorName}</strong>`;
+
+      div.addEventListener('dragstart', handleDragStart);
+      div.addEventListener('click', () => toggleSensorExpansion(div, sensor, dragId));
+
+      return div;
     }
 
-    function toggleDetails(e) {
-      const details = e.currentTarget.querySelector('.sensor-details');
-      details.style.display = details.style.display === 'block' ? 'none' : 'block';
+    // ------------- 센서 아이템 확장/축소 토글 -------------
+    function toggleSensorExpansion(div, sensor, dragId) {
+      if (expandedSensorId === dragId) {
+        collapseSensorItem(div, dragId);
+        expandedSensorId = null;
+      } else {
+        if (expandedSensorId) {
+          const prev = panel.querySelector(`[data-id="${expandedSensorId}"]`);
+          if (prev) collapseSensorItem(prev, expandedSensorId);
+        }
+        expandSensorItem(div, sensor, dragId);
+        expandedSensorId = dragId;
+      }
     }
 
-    // ------------------------- 드래그/드롭 ----------------------------
+    // 확장
+    function expandSensorItem(div, sensor, dragId) {
+      Object.assign(div.style, {
+        flexBasis: '400px',
+        backgroundColor: '#f0f8ff',
+        position: 'relative',
+      });
 
+      // 기존 캔버스 제거
+      const existingCanvas = div.querySelector('canvas');
+      if (existingCanvas) existingCanvas.remove();
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 380;
+      canvas.height = 150;
+      canvas.style.marginTop = '10px';
+      div.appendChild(canvas);
+
+      initChartAndFetch(sensor, dragId, canvas);
+    }
+
+    // 축소
+    function collapseSensorItem(div, dragId) {
+      Object.assign(div.style, {
+        flexBasis: '',
+        backgroundColor: 'white',
+        position: '',
+      });
+
+      if (activeCharts[dragId]) {
+        activeCharts[dragId].destroy();
+        delete activeCharts[dragId];
+      }
+      delete sensorData[dragId];
+      clearFetchInterval(dragId);
+
+      const canvas = div.querySelector('canvas');
+      if (canvas) canvas.remove();
+    }
+
+    // ------------- 차트 초기화 및 데이터 fetch 시작 -------------
+    function initChartAndFetch(sensor, dragId, canvas) {
+      if (!sensorData[dragId]) {
+  sensorData[dragId] = { labels: [], values: [], referenceValues: [] };
+}
+
+      const ctx = canvas.getContext('2d');
+      const color = getColor(Object.keys(activeCharts).length);
+
+      const chart = new Chart(ctx, createChartConfig(sensor.sensorName, dragId, color));
+      activeCharts[dragId] = chart;
+
+      fetchIntervals[dragId] = setInterval(async () => {
+  try {
+    const res = await fetch(`http://localhost:8080/api/sensors?sensorIds=${sensor.sensorId}`);
+    if (!res.ok) throw new Error('데이터 요청 실패');
+
+    const data = await res.json();
+    if (!data || data.length === 0) {
+      checkSensorTimeout(dragId, sensor);
+      return;
+    }
+
+    const d = data[0];
+    const now = Date.now();
+    const last = lastUpdateTimestamps[dragId] || 0;
+
+    // 데이터가 1초 이내인지 확인
+    const dataTimestamp = new Date(d.timestamp).getTime();
+    if (Math.abs(now - dataTimestamp) <= 1000) {
+      const timeStr = new Date(d.timestamp).toLocaleTimeString();
+      updateChart(dragId, timeStr, [{
+        name: d.name,
+        value: d.value,
+        referenceValue: d.referenceValue
+      }]);
+      lastUpdateTimestamps[dragId] = now;
+    } else {
+      checkSensorTimeout(dragId, sensor);
+    }
+
+  } catch (e) {
+    console.error('데이터 fetch 중 오류', e);
+  }
+}, FETCH_INTERVAL_MS);
+}
+
+    // ------------- 차트 설정 객체 생성 -------------
+    function createChartConfig(sensorName, dragId, color) {
+      return {
+        type: 'line',
+        data: {
+          labels: sensorData[dragId].labels,
+          datasets: [
+            {
+              label: sensorName,
+              data: sensorData[dragId].values,
+              borderColor: color,
+              backgroundColor: color + '33',
+              fill: false,
+              tension: 0.1,
+            },
+            {
+              label: `${sensorName} 기준값`,
+              data: sensorData[dragId].referenceValues,
+              borderColor: color,
+              borderDash: [5, 5],
+              pointRadius: 0,
+              fill: false,
+              tension: 0.1,
+            }
+          ]
+        },
+        options: {
+          scales: {
+            x: { type: 'category', title: { display: true, text: '시간' } },
+            y: { beginAtZero: true }
+          },
+          animation: false,
+          plugins: { legend: { labels: { font: { size: 12 } } } }
+        }
+      };
+    }
+
+    // ------------- 차트 데이터 업데이트 -------------
+    function updateChart(dragId, time, values) {
+      const data = sensorData[dragId];
+      data.labels.push(time);
+      data.values.push(parseFloat(values[0].value));
+      data.referenceValues.push(parseFloat(values[0].referenceValue));
+
+      if (data.labels.length > MAX_POINTS) {
+        data.labels.shift();
+        data.values.shift();
+        data.referenceValues.shift();
+      }
+
+      if (activeCharts[dragId]) activeCharts[dragId].update();
+    }
+
+    // ------------- fetchInterval 클리어 -------------
+    function clearFetchInterval(dragId) {
+      if (fetchIntervals[dragId]) {
+        clearInterval(fetchIntervals[dragId]);
+        delete fetchIntervals[dragId];
+      }
+    }
+
+    // ------------- 드래그 앤 드롭 이벤트 처리 -------------
     dropZone.addEventListener('dragover', e => {
       e.preventDefault();
       dropZone.style.backgroundColor = '#e3f2fd';
@@ -336,7 +502,9 @@
       dropZone.style.backgroundColor = 'white';
 
       const dragId = e.dataTransfer.getData('text/plain');
-      if (!dragId || activeCharts[dragId]) {
+      if (!dragId) return;
+
+      if (activeCharts[dragId]) {
         alert('이미 추가된 센서 그래프입니다.');
         return;
       }
@@ -344,107 +512,47 @@
       const sensor = findSensorByDragId(dragId);
       if (!sensor) return;
 
-      const updateFunc = createGraph(sensor);
-      activeUpdates[dragId] = updateFunc;
-
-      startFetchingSensorData(sensor);
-      saveActiveGraphs();
+      addGraphToDropZone(sensor, dragId);
     }
 
-    // ------------------------- 그래프 ----------------------------
+    // ------------- 드래그 시작 이벤트 -------------
+    function handleDragStart(e) {
+      e.dataTransfer.setData('text/plain', e.currentTarget.dataset.id);
+    }
 
-    function createGraph(sensor) {
-      const dragId = getDragId(sensor);
+    // ------------- 드롭존에 그래프 추가 -------------
+    function addGraphToDropZone(sensor, dragId) {
       const graphId = dragId.replace(/\|/g, '-');
 
-      // 그래프 박스 생성
       const graphBlock = document.createElement('div');
       graphBlock.className = 'graph-block';
       graphBlock.id = `graph-${graphId}`;
+
+      Object.assign(graphBlock.style, {
+        border: '1px solid #ccc',
+        padding: '10px',
+        marginBottom: '8px',
+        borderRadius: '5px',
+        backgroundColor: 'white',
+      });
+
       graphBlock.innerHTML = `
         <h4>${sensor.deviceSerial} - ${sensor.sensorName}</h4>
         <canvas id="chart-${graphId}" width="400" height="150"></canvas>
-        <button id="remove-${graphId}">그래프 제거</button>
+        <button id="remove-${graphId}" style="margin-top:8px;">그래프 제거</button>
       `;
+
       dropZone.appendChild(graphBlock);
 
-      // 데이터 초기화
-      sensorData[dragId] = {
-        labels: [],
-        values: [],
-        referenceValues: []
-      };
+      sensorData[dragId] = { labels: [], values: [], referenceValues: [] };
 
       const ctx = document.getElementById(`chart-${graphId}`).getContext('2d');
       const color = getColor(Object.keys(activeCharts).length);
 
-      const chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: sensorData[dragId].labels,
-          datasets: [
-            {
-              label: sensor.sensorName,
-              data: sensorData[dragId].values,
-              borderColor: color,
-              backgroundColor: color + '33',
-              fill: false,
-              tension: 0.1
-            },
-            {
-              label: `${sensor.sensorName} 기준값`,
-              data: sensorData[dragId].referenceValues,
-              borderColor: color,
-              borderDash: [5, 5],
-              pointRadius: 0,
-              fill: false,
-              tension: 0.1
-            }
-          ]
-        },
-        options: {
-          scales: {
-            x: { type: 'category', title: { display: true, text: '시간' } },
-            y: { beginAtZero: true }
-          }
-        }
-      });
-
+      const chart = new Chart(ctx, createChartConfig(sensor.sensorName, dragId, color));
       activeCharts[dragId] = chart;
 
-      document.getElementById(`remove-${graphId}`).addEventListener('click', () => {
-        chart.destroy();
-        delete activeCharts[dragId];
-        delete activeUpdates[dragId];
-        delete sensorData[dragId];
-        stopFetchingSensorData(dragId);
-        graphBlock.remove();
-        saveActiveGraphs();
-      });
-
-      return (time, values) => updateChart(dragId, time, values);
-    }
-
-    function updateChart(dragId, time, values) {
-      const data = sensorData[dragId];
-      data.labels.push(time);
-      data.values.push(parseFloat(values[0].value));
-      data.referenceValues.push(parseFloat(values[0].referenceValue));
-
-      if (data.labels.length > MAX_POINTS) {
-        data.labels.shift();
-        data.values.shift();
-        data.referenceValues.shift();
-      }
-
-      activeCharts[dragId].update();
-    }
-
-    // ------------------------- 데이터 요청 ----------------------------
-
-    function startFetchingSensorData(sensor) {
-      const dragId = getDragId(sensor);
-      if (fetchIntervals[dragId]) return;
+      activeUpdates[dragId] = (time, values) => updateChart(dragId, time, values);
 
       fetchIntervals[dragId] = setInterval(async () => {
         try {
@@ -452,72 +560,144 @@
           if (!res.ok) throw new Error('데이터 요청 실패');
 
           const data = await res.json();
-          if (!data || !data.length || !activeUpdates[dragId]) return;
+          if (!data || data.length === 0) return;
 
           const d = data[0];
           const timeStr = new Date(d.timestamp).toLocaleTimeString();
           const values = [{ name: d.name, value: d.value, referenceValue: d.referenceValue }];
 
-          activeUpdates[dragId](timeStr, values);
-        } catch (err) {
-          console.error(`센서(${dragId}) 데이터 요청 실패:`, err);
+          activeUpdates[dragId]?.(timeStr, values);
+        } catch (e) {
+          console.error('데이터 fetch 중 오류', e);
         }
       }, FETCH_INTERVAL_MS);
+
+      document.getElementById(`remove-${graphId}`).addEventListener('click', () => {
+        chart.destroy();
+        delete activeCharts[dragId];
+        delete activeUpdates[dragId];
+        delete sensorData[dragId];
+        clearFetchInterval(dragId);
+        graphBlock.remove();
+        saveActiveGraphs();
+      });
+
+      saveActiveGraphs();
     }
 
-    function stopFetchingSensorData(dragId) {
-      if (fetchIntervals[dragId]) {
-        clearInterval(fetchIntervals[dragId]);
-        delete fetchIntervals[dragId];
-      }
-    }
-
-    // ------------------------- 유틸 ----------------------------
-
-    function getDragId(sensor) {
-      return `${sensor.deviceSerial}|${sensor.sensorName}`;
-    }
-
-    function findSensorByDragId(dragId) {
-      const [deviceSerial, sensorName] = dragId.split('|');
-      return sensors.find(s => s.deviceSerial === deviceSerial && s.sensorName === sensorName);
-    }
-
-    function getColor(i) {
-      const colors = [
-        'rgba(255, 99, 132, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)'
-      ];
-      return colors[i % colors.length];
-    }
-
-    // ------------------------- 상태 저장 ----------------------------
-
+    // ------------- 로컬스토리지 저장/복원 -------------
     function saveActiveGraphs() {
-      const keys = Object.keys(activeCharts);
-      localStorage.setItem('activeSensorGraphs', JSON.stringify(keys));
+      localStorage.setItem('activeGraphs', JSON.stringify(Object.keys(activeCharts)));
     }
 
     function restoreSavedGraphs() {
-      const saved = localStorage.getItem('activeSensorGraphs');
-      if (!saved) return;
-
-      const keys = JSON.parse(saved);
-      keys.forEach(dragId => {
+      const saved = JSON.parse(localStorage.getItem('activeGraphs') || '[]');
+      saved.forEach(dragId => {
         const sensor = findSensorByDragId(dragId);
-        if (!sensor || activeCharts[dragId]) return;
-
-        const updateFunc = createGraph(sensor);
-        activeUpdates[dragId] = updateFunc;
-        startFetchingSensorData(sensor);
+        if (sensor) {
+          addGraphToDropZone(sensor, dragId);
+        }
       });
     }
 
-    // ------------------------- 시작 ----------------------------
+    // ------------- 유틸 -------------
+    function getDragId(sensor) {
+      return `${sensor.deviceSerial}|${sensor.sensorId}|${sensor.sensorName}`;
+    }
+
+    function findSensorByDragId(dragId) {
+      return sensors.find(s => getDragId(s) === dragId);
+    }
+
+    function getColor(index) {
+      const colors = [
+        '#ff6384', '#36a2eb', '#cc65fe', '#ffce56',
+        '#2ecc71', '#e67e22', '#3498db', '#9b59b6'
+      ];
+      return colors[index % colors.length];
+    }
+
+    function checkSensorTimeout(dragId, sensor) {
+  const now = Date.now();
+  const last = lastUpdateTimestamps[dragId] || 0;
+
+  if (now - last > 1000 && fetchIntervals[dragId]) {
+    clearFetchInterval(dragId);
+    console.warn(`센서 ${dragId} 데이터 없음. 업데이트 중단.`);
+
+    // 자동 재시작 감시 시작 (3초 간격)
+    if (!restartCheckIntervals[dragId]) {
+      restartCheckIntervals[dragId] = setInterval(() => {
+        tryRestartSensorFetch(dragId, sensor);
+      }, 3000);
+    }
+  }
+}
+
+async function tryRestartSensorFetch(dragId, sensor) {
+  try {
+    const res = await fetch(`http://localhost:8080/api/sensors?sensorIds=${sensor.sensorId}`);
+    if (!res.ok) throw new Error('데이터 요청 실패');
+
+    const data = await res.json();
+    if (!data || data.length === 0) return;
+
+    const d = data[0];
+    const now = Date.now();
+    const dataTimestamp = new Date(d.timestamp).getTime();
+
+    if (Math.abs(now - dataTimestamp) <= 1000) {
+      console.info(`센서 ${dragId} 데이터 재수신. 업데이트 재개.`);
+
+      // 상태 초기화
+      lastUpdateTimestamps[dragId] = now;
+
+      // 감시 중단
+      clearInterval(restartCheckIntervals[dragId]);
+      delete restartCheckIntervals[dragId];
+
+      // fetch 재시작
+      restartSensorFetch(dragId, sensor);
+    }
+  } catch (e) {
+    console.error('자동 재시작 fetch 실패:', e);
+  }
+}
+
+function restartSensorFetch(dragId, sensor) {
+  fetchIntervals[dragId] = setInterval(async () => {
+    try {
+      const res = await fetch(`http://localhost:8080/api/sensors?sensorIds=${sensor.sensorId}`);
+      if (!res.ok) throw new Error('데이터 요청 실패');
+
+      const data = await res.json();
+      if (!data || data.length === 0) {
+        checkSensorTimeout(dragId, sensor);
+        return;
+      }
+
+      const d = data[0];
+      const now = Date.now();
+      const dataTimestamp = new Date(d.timestamp).getTime();
+
+      if (Math.abs(now - dataTimestamp) <= 1000) {
+        const timeStr = new Date(d.timestamp).toLocaleTimeString();
+        updateChart(dragId, timeStr, [{
+          name: d.name,
+          value: d.value,
+          referenceValue: d.referenceValue
+        }]);
+        lastUpdateTimestamps[dragId] = now;
+      } else {
+        checkSensorTimeout(dragId, sensor);
+      }
+    } catch (e) {
+      console.error('데이터 fetch 중 오류', e);
+    }
+  }, FETCH_INTERVAL_MS);
+}
+
+    // ------------- 시작 -------------
     initialize();
 </script>
 </body>
