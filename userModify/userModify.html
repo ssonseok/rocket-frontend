@@ -1,27 +1,172 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>회원 수정</title>
-  <script src="userModify.js" defer></script>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <title>회원 수정 | 관리자 모드</title>
+
+  <link href="../src/css/styles.css" rel="stylesheet" />
+  <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+
+  <style>
+    .bg-info { background-color: #007bff !important; }
+    .sb-sidenav-dark, .sb-sidenav-dark .sb-sidenav-menu-heading { background-color: #007bff; color: rgba(255, 255, 255, 0.5); }
+    .sb-sidenav-dark .nav-link { color: rgba(255, 255, 255, 0.8); }
+    .sb-sidenav-dark .nav-link:hover { color: #fff; }
+    .sb-sidenav-dark .nav-link.active { color: #fff; background-color: rgba(255, 255, 255, 0.15); }
+  </style>
 </head>
-<body>
-<h1>회원 수정</h1>
-<div>
-  <label for="userid">아이디:</label>
-  <input type="text" id="userid" readonly style="background-color:#eee"><br><br>
+<body class="sb-nav-fixed">
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-info">
+  <a class="navbar-brand ps-3" href="../adminMenu/adminMenu.html">관리자 모드</a>
+  <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+  <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
+    <div class="input-group">
+      <input class="form-control" type="text" placeholder="검색..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
+      <button class="btn btn-light" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
+    </div>
+  </form>
+  <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+        <li><a class="dropdown-item" href="#!">설정</a></li>
+        <li><a class="dropdown-item" href="#!">활동 로그</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" href="#!">로그아웃</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
 
-  <label for="name">이름:</label>
-  <input type="text" id="name"><br><br>
+<div id="layoutSidenav">
+  <div id="layoutSidenav_nav">
+    <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+      <div class="sb-sidenav-menu">
+        <div class="nav">
+          <div class="sb-sidenav-menu-heading">CORE</div>
+          <a class="nav-link" href="../adminMenu/adminMenu.html">
+            <div class="sb-nav-link-icon"><i class="fas fa-fw fa-tachometer-alt"></i></div>
+            대시보드 / 메뉴
+          </a>
 
-  <label for="email">이메일:</label>
-  <input type="text" id="email"><br><br>
+          <div class="sb-sidenav-menu-heading">관리 기능</div>
 
-  <label for="tel">전화번호:</label>
-  <input type="text" id="tel"><br><br>
+          <a class="nav-link" href="../deviceRegister/deviceRegister.html">
+            <div class="sb-nav-link-icon"><i class="fas fa-plus-circle"></i></div>
+            장비 등록
+          </a>
 
-  <button id="modify-btn">수정</button>
+          <a class="nav-link" href="../deviceList/deviceList.html">
+            <div class="sb-nav-link-icon"><i class="fas fa-list-ul"></i></div>
+            장비 목록 확인
+          </a>
+
+          <a class="nav-link active" href="../userManage/userManage.html">
+            <div class="sb-nav-link-icon"><i class="fas fa-users-cog"></i></div>
+            회원 관리
+          </a>
+
+          <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseReports" aria-expanded="false" aria-controls="collapseReports">
+            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+            데이터 리포트
+            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+          </a>
+          <div class="collapse" id="collapseReports" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+            <nav class="sb-sidenav-menu-nested nav">
+              <a class="nav-link" href="#!">일간 통계</a>
+              <a class="nav-link" href="#!">월간 분석</a>
+            </nav>
+          </div>
+        </div>
+      </div>
+      <div class="sb-sidenav-footer">
+        <div class="small">로그인 사용자:</div>
+        관리자 (Admin)
+      </div>
+    </nav>
+  </div>
+
+  <div id="layoutSidenav_content">
+    <main>
+      <div class="container-fluid px-4">
+        <h1 class="mt-4">회원 정보 수정</h1>
+        <ol class="breadcrumb mb-4">
+          <li class="breadcrumb-item"><a href="../adminMenu/adminMenu.html">대시보드 / 메뉴</a></li>
+          <li class="breadcrumb-item"><a href="../userManage/userManage.html">회원 관리</a></li>
+          <li class="breadcrumb-item active">회원 정보 수정</li>
+        </ol>
+
+        <div class="row justify-content-center">
+          <div class="col-lg-7">
+            <div class="card shadow mb-4">
+              <div class="card-header"><i class="fas fa-edit me-1"></i> 회원 정보 수정 폼</div>
+              <div class="card-body">
+                <div>
+                  <div class="mb-3">
+                    <label for="userid" class="form-label">아이디</label>
+                    <input type="text" class="form-control" id="userid" readonly style="background-color:#e9ecef;">
+                  </div>
+                  <div class="mb-3">
+                    <label for="name" class="form-label">이름</label>
+                    <input type="text" class="form-control" id="name">
+                  </div>
+                  <div class="mb-3">
+                    <label for="email" class="form-label">이메일</label>
+                    <input type="email" class="form-control" id="email">
+                  </div>
+                  <div class="mb-3">
+                    <label for="tel" class="form-label">전화번호</label>
+                    <input type="tel" class="form-control" id="tel">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="newPw" class="form-label">새 비밀번호 (선택)</label>
+                    <input type="password" class="form-control" id="newPw" placeholder="수정 시에만 입력">
+                  </div>
+                  <div class="mb-3">
+                    <label for="newPwConfirm" class="form-label">새 비밀번호 확인</label>
+                    <input type="password" class="form-control" id="newPwConfirm" placeholder="새 비밀번호 재입력">
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="userRole" class="form-label">회원 유형</label>
+                    <select class="form-select" id="userRole">
+                      <option value="ROLE_USER">일반 사용자</option>
+                      <option value="ROLE_ADMIN">관리자</option>
+                    </select>
+                  </div>
+
+                  <div class="d-grid mt-4">
+                    <button id="modify-btn" class="btn btn-warning btn-lg">
+                      <i class="fas fa-save me-2"></i> 정보 수정 완료
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="py-4 bg-light mt-auto">
+      <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between small">
+          <div class="text-muted">Copyright &copy; Your Website 2023</div>
+          <div>
+            <a href="#">Privacy Policy</a> &middot; <a href="#">Terms &amp; Conditions</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="../src/js/scripts.js"></script>
+
+<script src="../userModify/userModify.js" defer></script>
 </body>
 </html>
-
