@@ -31,7 +31,7 @@
                                                 <label for="inputEmail">이메일</label>
                                             </div>
                                             <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
-                                                <a class="small" href="/login.html">로그인 페이지로 돌아가기</a>
+                                                <a class="small" href="/rocket-frontend/public/login.html">로그인 페이지로 돌아가기</a>
                                                 <button type="submit" class="btn btn-primary">보내기</button>
                                             </div>
                                         </form>
@@ -71,29 +71,26 @@
                     return;
                 }
 
-                // 사용자에게 처리 시간에 대한 안내 메시지
                 alert('요청을 처리하는 데 10초에서 20초 정도 걸릴 수 있습니다.');
 
                 try {
                     const response = await fetch('http://localhost:8080/api/changePw', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ id: username, email: email })
                     });
 
-                    if (!response.ok) {
-                        throw new Error('서버 오류: ' + response.status);
-                    }
-
                     const data = await response.json();
 
-                    if (data.status === 'success') {
+                    if (response.ok && data.status === 'success') {
                         alert('입력하신 이메일로 비밀번호 변경 링크가 전송되었습니다.');
-                        window.location.href = '/login.html';
-                    } else {
+                        window.location.href = '/rocket-frontend/public/login.html';
+                    } else if (data.status === 'fail') {
+                        // 서버가 실패 메시지와 함께 status: "fail" 반환 시
                         alert(data.message || '비밀번호 변경 요청에 실패했습니다.');
+                    } else {
+                        // 기타 예상치 못한 응답 처리
+                        alert(data.message || '이메일과 아이디를 확인해주세요.');
                     }
                 } catch (error) {
                     console.error('비밀번호 변경 오류:', error);

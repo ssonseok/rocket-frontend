@@ -19,6 +19,13 @@
           flex-direction: column;
         }
         /* 상단 네비게이션 바 높이 제외하고 컨텐츠 높이 지정 */
+        #dropZone {
+  position: relative; /* 중요: 자식 요소의 absolute 기준이 됨 */
+  min-height: 500px;
+  background-color: #fafafa;
+  border: 2px dashed #90caf9;
+  overflow: hidden; /* 선택: 그래프가 영역을 넘지 않게 */
+}
         #layoutSidenav_content {
           flex: 1;
           display: flex;
@@ -94,12 +101,18 @@
           margin-top: 20px;
           border: 1px solid #ccc;
         }
+        .drag-handle {
+  background-color: #f0f0f0;
+  padding: 6px;
+  cursor: move;
+  user-select: none;
+}
     </style>
 </head>
 <body class="sb-nav-fixed">
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
     <!-- Navbar Brand-->
-    <a class="navbar-brand ps-3" href="/index.html">Start Bootstrap</a>
+    <a class="navbar-brand ps-3" href="/rocket-frontend/public/index.html">Start Bootstrap</a>
     <!-- Sidebar Toggle-->
     <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
     <!-- Navbar Search-->
@@ -117,7 +130,7 @@
                 <li><a class="dropdown-item" href="#!">Settings</a></li>
                 <li><a class="dropdown-item" href="#!">Activity Log</a></li>
                 <li><hr class="dropdown-divider" /></li>
-                <li><a class="dropdown-item" href="#!">Logout</a></li>
+                <li><a class="dropdown-item" href="#!" onclick="logout()">로그아웃</a></li>
             </ul>
         </li>
     </ul>
@@ -140,8 +153,8 @@
                     </a>
                     <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
                         <nav class="sb-sidenav-menu-nested nav">
-                            <a class="nav-link" href="#">Static Navigation</a>
-                            <a class="nav-link" href="#">Light Sidenav</a>
+                            <a class="nav-link" href="/rocket-frontend/public/history.html">History</a>
+                            <a class="nav-link" href="/rocket-frontend/public/prediction.html">Prediction</a>
                         </nav>
                     </div>
                     <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
@@ -152,43 +165,23 @@
                     <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
                         <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
                             <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseAuth" aria-expanded="false" aria-controls="pagesCollapseAuth">
-                                Authentication
+                                인증
                                 <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                             </a>
                             <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
                                 <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="login.html">Login</a>
-                                    <a class="nav-link" href="register.html">Register</a>
-                                    <a class="nav-link" href="password.html">Forgot Password</a>
-                                </nav>
-                            </div>
-                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseError" aria-expanded="false" aria-controls="pagesCollapseError">
-                                Error
-                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                            </a>
-                            <div class="collapse" id="pagesCollapseError" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
-                                <nav class="sb-sidenav-menu-nested nav">
-                                    <a class="nav-link" href="#">401 Page</a>
-                                    <a class="nav-link" href="#">404 Page</a>
-                                    <a class="nav-link" href="#">500 Page</a>
+                                    <a class="nav-link" href="login.html">로그인</a>
+                                    <a class="nav-link" href="findId.html">아이디찾기</a>
+                                    <a class="nav-link" href="changePw.html">비밀번호 변경</a>
                                 </nav>
                             </div>
                         </nav>
                     </div>
-                    <div class="sb-sidenav-menu-heading">Addons</div>
-                    <a class="nav-link" href="charts.html">
-                        <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                        Charts
-                    </a>
-                    <a class="nav-link" href="tables.html">
-                        <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                        Tables
-                    </a>
                 </div>
             </div>
             <div class="sb-sidenav-footer">
                 <div class="small">Logged in as:</div>
-                Start Bootstrap
+                <span id="loggedInUser">User</span>
             </div>
         </nav>
     </div>
@@ -234,7 +227,6 @@
         </footer>
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 <script src="/src/js/scripts.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
@@ -259,9 +251,11 @@
 
 function authFetch(url, options = {}) {
   const token = localStorage.getItem('token');
+
   if (!token) {
-    alert('로그인이 필요합니다.');
-    throw new Error('JWT 토큰이 없습니다.');
+    alert('🔒 로그인 정보가 없습니다. 다시 로그인해주세요.');
+    window.location.href = '/rocket-frontend/public/login.html';
+    return;  // 여기서 return 안하면 계속 함수 진행됨
   }
 
   const headers = {
@@ -269,7 +263,14 @@ function authFetch(url, options = {}) {
     'Authorization': `Bearer ${token}`
   };
 
-  return fetch(url, { ...options, headers });
+  // options에 headers 덮어쓰기
+  const fetchOptions = {
+    ...options,
+    headers
+  };
+
+  // fetch 결과 반환
+  return fetch(url, fetchOptions);
 }
 
     // ------------- 초기화 -------------
@@ -277,6 +278,98 @@ function authFetch(url, options = {}) {
       await loadSensors();
       restoreSavedGraphs();
     }
+
+    function logout() {
+    localStorage.removeItem('token');  // 또는 sessionStorage.removeItem('token');
+    window.location.href = '/rocket-frontend/public/login.html';
+  }
+
+function makeChartResizable(container, canvas, chart) {
+  // ResizeObserver를 통해 캔버스 사이즈 변경 감지
+  const resizeObserver = new ResizeObserver(() => {
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    canvas.width = width;
+    canvas.height = height;
+
+    chart.resize();
+  });
+
+  resizeObserver.observe(container);
+}
+
+function makeGraphMovable(handleEl, targetEl) {
+  let offsetX = 0;
+  let offsetY = 0;
+  let isDragging = false;
+
+  handleEl.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    const rect = targetEl.getBoundingClientRect();
+    const parentRect = dropZone.getBoundingClientRect();
+
+    // 마우스 클릭한 위치 - 요소의 위치 (내부 상대 위치 저장)
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+
+    // 드래그 시 가장 위로
+    targetEl.style.zIndex = 1000;
+
+    // Prevent text selection
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+
+    const parentRect = dropZone.getBoundingClientRect();
+    const targetWidth = targetEl.offsetWidth;
+    const targetHeight = targetEl.offsetHeight;
+
+    // 새 위치 계산 (마우스 위치 - 부모 시작점 - 오프셋)
+    let newLeft = e.clientX - parentRect.left - offsetX;
+    let newTop = e.clientY - parentRect.top - offsetY;
+
+    // 경계 제한: dropZone 내부로 고정
+    newLeft = Math.max(0, Math.min(parentRect.width - targetWidth, newLeft));
+    newTop = Math.max(0, Math.min(parentRect.height - targetHeight, newTop));
+
+    // 위치 적용
+    targetEl.style.left = `${newLeft}px`;
+    targetEl.style.top = `${newTop}px`;
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+  });
+}
+
+function parseJwt(token) {
+    if (!token) return null;
+    const base64Payload = token.split('.')[1];
+    const payload = atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(payload);
+  }
+
+  // 페이지 로드시 실행
+  window.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const payload = parseJwt(token);
+      if (payload && payload.sub) {
+        document.getElementById('loggedInUser').textContent = payload.sub;
+      }
+    }
+  });
+
+if (token) {
+  const payload = parseJwt(token);
+  const userId = payload.sub; // JWT에서 사용자 id가 'sub'에 저장되어 있다고 가정
+
+  // HTML에 넣기
+  document.getElementById('loggedInUser').textContent = userId;
+}
 
     // ------------- 센서 목록 로딩 -------------
    async function loadSensors() {
@@ -540,83 +633,114 @@ function authFetch(url, options = {}) {
 
     // ------------- 드롭존에 그래프 추가 -------------
     function addGraphToDropZone(sensor, dragId) {
-      const graphId = dragId.replace(/\|/g, '-');
+  const graphId = dragId.replace(/\|/g, '-');
 
-      const graphBlock = document.createElement('div');
-      graphBlock.className = 'graph-block';
-      graphBlock.id = `graph-${graphId}`;
+  const graphBlock = document.createElement('div');
+  graphBlock.className = 'graph-block';
+  graphBlock.id = `graph-${graphId}`;
 
-      Object.assign(graphBlock.style, {
-        border: '1px solid #ccc',
-        padding: '10px',
-        marginBottom: '8px',
-        borderRadius: '5px',
-        backgroundColor: 'white',
-      });
+  Object.assign(graphBlock.style, {
+    position: 'absolute',  // 위치 이동 가능하게
+    top: '0px',
+    left: '0px',
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    backgroundColor: 'white',
+    resize: 'both',
+    overflow: 'auto',
+    width: '400px',
+    height: '200px',
+    zIndex: 10,
+  });
 
-      graphBlock.innerHTML = `
-        <h4>${sensor.deviceSerial} - ${sensor.sensorName}</h4>
-        <canvas id="chart-${graphId}" width="400" height="150"></canvas>
-        <button id="remove-${graphId}" style="margin-top:8px;">그래프 제거</button>
-      `;
+  graphBlock.innerHTML = `
+    <div class="drag-handle" style="cursor: move; background: #f7f7f7; padding: 5px; font-weight: bold;">
+      ${sensor.deviceSerial} - ${sensor.sensorName}
+      <button id="remove-${graphId}" style="float: right;">X</button>
+    </div>
+    <canvas id="chart-${graphId}" style="display: block;"></canvas>
+  `;
 
-      dropZone.appendChild(graphBlock);
+  dropZone.appendChild(graphBlock);
 
-      sensorData[dragId] = { labels: [], values: [], referenceValues: [] };
+  const canvas = document.getElementById(`chart-${graphId}`);
+  const ctx = canvas.getContext('2d');
 
-      const ctx = document.getElementById(`chart-${graphId}`).getContext('2d');
-      const color = getColor(Object.keys(activeCharts).length);
+  sensorData[dragId] = { labels: [], values: [], referenceValues: [] };
+  const color = getColor(Object.keys(activeCharts).length);
+  const chart = new Chart(ctx, createChartConfig(sensor.sensorName, dragId, color));
+  activeCharts[dragId] = chart;
 
-      const chart = new Chart(ctx, createChartConfig(sensor.sensorName, dragId, color));
-      activeCharts[dragId] = chart;
+  makeChartResizable(graphBlock, canvas, chart); // ✅ 크기 자동 조절
 
-      activeUpdates[dragId] = (time, values) => updateChart(dragId, time, values);
+  // ✅ 이동 기능 추가
+  makeGraphMovable(graphBlock.querySelector('.drag-handle'), graphBlock);
 
-      fetchIntervals[dragId] = setInterval(async () => {
-        try {
-          const res = await authFetch(`http://localhost:8080/api/sensors?sensorIds=${sensor.sensorId}`);
-          if (!res.ok) throw new Error('데이터 요청 실패');
+  document.getElementById(`remove-${graphId}`).addEventListener('click', () => {
+    chart.destroy();
+    delete activeCharts[dragId];
+    delete activeUpdates[dragId];
+    delete sensorData[dragId];
+    clearFetchInterval(dragId);
+    graphBlock.remove();
+    saveActiveGraphs();
+  });
 
-          const data = await res.json();
-          if (!data || data.length === 0) return;
+  activeUpdates[dragId] = (time, values) => updateChart(dragId, time, values);
 
-          const d = data[0];
-          const timeStr = new Date(d.timestamp).toLocaleTimeString();
-          const values = [{ name: d.name, value: d.value, referenceValue: d.referenceValue }];
+  fetchIntervals[dragId] = setInterval(async () => {
+    try {
+      const res = await authFetch(`http://localhost:8080/api/sensors?sensorIds=${sensor.sensorId}`);
+      if (!res.ok) throw new Error('데이터 요청 실패');
+      const data = await res.json();
+      if (!data || data.length === 0) return;
 
-          activeUpdates[dragId]?.(timeStr, values);
-        } catch (e) {
-          console.error('데이터 fetch 중 오류', e);
-        }
-      }, FETCH_INTERVAL_MS);
+      const d = data[0];
+      const timeStr = new Date(d.timestamp).toLocaleTimeString();
+      const values = [{ name: d.name, value: d.value, referenceValue: d.referenceValue }];
 
-      document.getElementById(`remove-${graphId}`).addEventListener('click', () => {
-        chart.destroy();
-        delete activeCharts[dragId];
-        delete activeUpdates[dragId];
-        delete sensorData[dragId];
-        clearFetchInterval(dragId);
-        graphBlock.remove();
-        saveActiveGraphs();
-      });
-
-      saveActiveGraphs();
+      activeUpdates[dragId]?.(timeStr, values);
+    } catch (e) {
+      console.error('데이터 fetch 중 오류', e);
     }
+  }, FETCH_INTERVAL_MS);
+
+  saveActiveGraphs();
+}
 
     // ------------- 로컬스토리지 저장/복원 -------------
-    function saveActiveGraphs() {
-      localStorage.setItem('activeGraphs', JSON.stringify(Object.keys(activeCharts)));
-    }
+    async function saveActiveGraphs() {
+  const dragIds = Object.keys(activeCharts);
+  try {
+    await authFetch('http://localhost:8080/api/user/graph-layout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ activeGraphs: dragIds }),
+    });
+    console.log('🧠 그래프 상태 서버에 저장 완료');
+  } catch (e) {
+    console.error('⚠️ 그래프 상태 저장 실패:', e);
+  }
+}
 
-    function restoreSavedGraphs() {
-      const saved = JSON.parse(localStorage.getItem('activeGraphs') || '[]');
-      saved.forEach(dragId => {
-        const sensor = findSensorByDragId(dragId);
-        if (sensor) {
-          addGraphToDropZone(sensor, dragId);
-        }
-      });
-    }
+    async function restoreSavedGraphs() {
+  try {
+    const res = await authFetch('http://localhost:8080/api/user/graph-layout');
+    if (!res.ok) throw new Error('그래프 레이아웃 불러오기 실패');
+
+    const data = await res.json();
+    const saved = data.activeGraphs || [];
+
+    saved.forEach(dragId => {
+      const sensor = findSensorByDragId(dragId);
+      if (sensor) {
+        addGraphToDropZone(sensor, dragId);
+      }
+    });
+  } catch (e) {
+    console.error('⚠️ 그래프 상태 복원 실패:', e);
+  }
+}
 
     // ------------- 유틸 -------------
     function getDragId(sensor) {
