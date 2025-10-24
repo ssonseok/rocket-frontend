@@ -30,8 +30,8 @@
                                                 <label for="inputPassword">비밀번호</label>
                                             </div>
                                             <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
-                                                <a class="small" href="/findId.html">아이디찾기</a>
-                                                <a class="small" href="/changePw.html">비밀번호 변경</a>
+                                                <a class="small" href="/rocket-frontend/public/findId.html">아이디찾기</a>
+                                                <a class="small" href="/rocket-frontend/public/changePw.html">비밀번호 변경</a>
                                                 <button type="submit" class="btn btn-primary">로그인</button>
                                             </div>
                                         </form>
@@ -85,11 +85,18 @@
                     const data = await response.json();
 
                     if (data.status === 'success') {
-                        // ✅ 토큰을 저장
+                        // ✅ 토큰과 permission 저장
                         localStorage.setItem('token', data.token);
+                        localStorage.setItem('permission', data.permission);
 
-                        // ✅ 메인 페이지로 이동
-                        window.location.href = '/index.html';
+                        // ✅ 권한에 따라 다른 페이지로 이동
+                        if (data.permission === '1') {
+                            window.location.href = '/rocket-frontend/adminMenu/adminMenu.html';
+                        } else if (data.permission === '0') {
+                            window.location.href = '/rocket-frontend/public/index.html';
+                        } else {
+                            alert('알 수 없는 권한입니다.');
+                        }
                     } else {
                         alert(data.message || '로그인 실패: 아이디 또는 비밀번호가 올바르지 않습니다.');
                     }
