@@ -1,27 +1,23 @@
+
 const deviceNameInput = document.getElementById("deviceName");
 const deviceSerialInput = document.getElementById("deviceSerial");
-const deviceIPInput = document.getElementById("deviceIP");
-const devicePortInput = document.getElementById("devicePort");
 
-const registerBtn = document.getElementById("registerDeviceBtn"); // 장치 등록 & 데이터 확인 버튼
+const edgeSerialInput = document.getElementById("edgeSerial");
+const portPathInput = document.getElementById("portPath");
+
+const registerBtn = document.getElementById("registerDeviceBtn");
 const dataSettingsDiv = document.getElementById("dataSettings");
-const finalRegisterBtn = document.getElementById("finalRegisterBtn"); // 최종 등록 버튼
+const finalRegisterBtn = document.getElementById("finalRegisterBtn");
 
 let serialNumber = "";
 let dataCount = 0;
-let isDataReady = false; // 데이터 확보 상태 플래그
+let isDataReady = false;
 
-// 초기 상태 설정
 finalRegisterBtn.disabled = true;
-registerBtn.textContent = "연결"; // 초기 텍스트 설정
+registerBtn.textContent = "장비 등록 및 연결 테스트"; // 초기 텍스트 설정
 
-// --- 헬퍼 함수 ---
-
-/**
- * 센서 데이터 폼을 동적으로 생성하고, 최종 등록 버튼을 활성화합니다.
- * @param {number} count 생성할 센서 폼의 개수
- */
 function createDataForm(count) {
+    // ... (함수 내부 로직 유지) ...
     dataSettingsDiv.innerHTML = "<h2>센서 데이터 설정 (총 " + count + "개)</h2>";
     for (let i = 0; i < count; i++) {
         const div = document.createElement("div");
@@ -45,20 +41,13 @@ function createDataForm(count) {
         dataSettingsDiv.appendChild(div);
     }
     finalRegisterBtn.disabled = false;
-    registerBtn.textContent = "연결 완료"; // 연결 버튼 텍스트 변경
-    registerBtn.disabled = true; // 폼 생성 후 연결 버튼 비활성화
+    registerBtn.textContent = "연결 완료";
+    registerBtn.disabled = true;
     isDataReady = true;
 }
 
-/**
- * 장치 등록 API를 호출하여 상태를 확인하고 폼을 생성합니다. (최초 등록 시 사용)
- * @param {string} serial 시리얼 번호
- * @param {string} name 장치명
- * @param {string} ip IP 주소
- * @param {string} port 포트 번호
- */
-async function registerAndCheckData(serial, name, ip, port) {
-    registerBtn.disabled = true; // 중복 클릭 방지
+async function registerAndCheckData(serial, name, edgeSerial, portPath) {
+    registerBtn.disabled = true;
 
     try {
         const res = await fetch("http://localhost:8080/api/device/register", {
@@ -67,23 +56,24 @@ async function registerAndCheckData(serial, name, ip, port) {
             body: JSON.stringify({
                 deviceSerialNumber: serial,
                 name: name,
-                ip: ip,
-                port: Number(port)
+                // 🛠️ EdgeSerial과 PortPath 사용
+                edgeSerial: edgeSerial,
+                portPath: portPath
             })
         });
 
         const data = await res.json();
-        registerBtn.disabled = false; // 재시도를 위해 일단 활성화
+        registerBtn.disabled = false;
 
         if (!res.ok || (data.status !== "success" && data.status !== "pending")) {
-            // 실패: 중복 또는 연결 실패 (400 Bad Request 포함)
+            // 실패: 중복, 연결 실패, 또는 외래 키(Edge Serial 미등록) 오류
             const errorMsg = data.errorType || data.message || "알 수 없는 오류";
             alert(` 장치 등록/연결 실패: ${errorMsg}`);
-            registerBtn.textContent = "연결 (재시도)";
+            registerBtn.textContent = "재시도";
             return;
         }
 
-        serialNumber = serial; // 시리얼 번호 저장
+        serialNumber = serial;
 
         if (data.status === "success" && data.device.dataCount > 0) {
             // ✅ 성공: 데이터까지 확보 완료, 폼 생성
@@ -93,24 +83,20 @@ async function registerAndCheckData(serial, name, ip, port) {
 
         } else if (data.status === "pending") {
             // ⏳ 대기: 엣지 연결은 됐으나 데이터 대기 중
-            alert(" 엣지 연결 성공. 센서 데이터 수신 대기 중입니다. '연결 버튼'을 다시 눌러 확인해주세요.");
-            dataSettingsDiv.innerHTML = "<p>엣지 연결 성공. 센서 데이터 수신을 위해 잠시 기다려주세요. **연결 버튼**을 다시 눌러 확인해주세요.</p>";
+            alert(" 엣지 연결 성공. 센서 데이터 수신 대기 중입니다. '데이터 확인'을 다시 눌러 확인해주세요.");
+            dataSettingsDiv.innerHTML = "<p>엣지 연결 성공. 센서 데이터 수신을 위해 잠시 기다려주세요. **데이터 확인** 버튼을 다시 눌러 확인해주세요.</p>";
             // ✨ 다음 클릭부터는 재시도 API를 호출하도록 텍스트 변경
-            registerBtn.textContent = "데이터 확인 (재시도)";
+            registerBtn.textContent = "데이터 확인";
         }
 
     } catch (err) {
         console.error("통신 오류:", err);
         registerBtn.disabled = false;
-        registerBtn.textContent = "연결 (통신 오류)";
+        registerBtn.textContent = "통신 오류 (재시도)";
         alert("장치 등록 요청 중 통신 오류 발생");
     }
 }
 
-/**
- * ✨ 새로 추가된 GET /data-status API를 호출하여 데이터 확보 여부만 확인합니다. (재시도 시 사용)
- * @param {string} serial 시리얼 번호
- */
 async function checkDataStatusOnly(serial) {
     registerBtn.disabled = true;
 
@@ -133,13 +119,13 @@ async function checkDataStatusOnly(serial) {
         } else if (data.status === "pending") {
             // ⏳ 데이터 대기 중
             alert("⏳ 데이터 수신 대기 중입니다. 잠시 후 다시 확인해주세요.");
-            registerBtn.textContent = "데이터 확인 (재시도)"; // 텍스트 유지
+            registerBtn.textContent = "데이터 확인"; // 텍스트 유지
             return false;
 
         } else {
              // 실패: 장치 없음, 연결 끊김 등
              alert(` 데이터 확인 실패: ${data.message || data.errorType}`);
-             registerBtn.textContent = "연결 (재시도)";
+             registerBtn.textContent = "재시도";
              return false;
         }
 
@@ -152,15 +138,15 @@ async function checkDataStatusOnly(serial) {
 }
 
 
-// --- 1. 연결 버튼 클릭 리스너 ---
 registerBtn.addEventListener("click", async () => {
     const deviceName = deviceNameInput.value.trim();
     const serial = deviceSerialInput.value.trim();
-    const ip = deviceIPInput.value.trim();
-    const port = devicePortInput.value.trim();
 
-    if (!deviceName || !serial || !ip || !port) {
-        alert("모든 장치 정보를 입력해주세요.");
+    const edgeSerial = edgeSerialInput.value.trim();
+    const portPath = portPathInput.value.trim();
+
+    if (!deviceName || !serial || !edgeSerial || !portPath) { // 🛠️ 유효성 검사 수정
+        alert("모든 필수 장치 정보를 입력해주세요.");
         return;
     }
 
@@ -169,11 +155,11 @@ registerBtn.addEventListener("click", async () => {
         return;
     }
 
-    // A. 텍스트가 '데이터 확인 (재시도)'인 경우 -> 재시도 로직 실행 (GET API 호출)
+    // A. 텍스트가 '데이터 확인'인 경우 -> 재시도 로직 실행 (GET API 호출)
     if (registerBtn.textContent.includes("데이터 확인")) {
         if (!serialNumber) {
             alert("장치 등록 과정에 문제가 발생했습니다. 처음부터 다시 시도해주세요.");
-            registerBtn.textContent = "연결 (재시도)";
+            registerBtn.textContent = "재시도";
             return;
         }
         await checkDataStatusOnly(serialNumber);
@@ -181,11 +167,9 @@ registerBtn.addEventListener("click", async () => {
     }
 
     // B. 그 외의 경우 (첫 번째 등록 시도) -> 등록 로직 실행 (POST API 호출)
-    await registerAndCheckData(serial, deviceName, ip, port);
+    await registerAndCheckData(serial, deviceName, edgeSerial, portPath);
 });
 
-
-// --- 2. 최종 등록 버튼 클릭 ---
 finalRegisterBtn.addEventListener("click", async () => {
     if (finalRegisterBtn.disabled || !isDataReady) {
         alert("먼저 장치 연결을 완료하고 센서 데이터를 확보해야 합니다.");

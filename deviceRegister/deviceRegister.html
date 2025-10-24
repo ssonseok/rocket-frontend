@@ -110,20 +110,21 @@
                   </div>
                   <div class="mb-3">
                     <label for="deviceSerial" class="form-label">시리얼번호</label>
-                    <input type="text" class="form-control" id="deviceSerial" placeholder="예: SN-001234">
+                    <input type="text" class="form-control" id="deviceSerial" placeholder="예: device1">
                   </div>
+
                   <div class="row">
-                    <div class="col-md-8 mb-3">
-                      <label for="deviceIP" class="form-label">IP 주소</label>
-                      <input type="text" class="form-control" id="deviceIP" placeholder="예: 192.168.1.100">
+                    <div class="col-md-6 mb-3">
+                      <label for="edgeSerial" class="form-label">엣지 시리얼 (Edge Serial)</label>
+                      <input type="text" class="form-control" id="edgeSerial" placeholder="예: edge-gw-001">
                     </div>
-                    <div class="col-md-4 mb-3">
-                      <label for="devicePort" class="form-label">Port</label>
-                      <input type="number" class="form-control" id="devicePort" placeholder="예: 8080">
+                    <div class="col-md-6 mb-3">
+                      <label for="portPath" class="form-label">포트 경로 (Port Path)</label>
+                      <input type="text" class="form-control" id="portPath" placeholder="예: /dev/ttyUSB0">
                     </div>
                   </div>
                   <button id="registerDeviceBtn" class="btn btn-primary mt-2">
-                    <i class="fas fa-link me-2"></i> 장치 연결 테스트
+                    <i class="fas fa-link me-2"></i> 장비 등록 및 연결 테스트
                   </button>
                 </div>
               </div>
