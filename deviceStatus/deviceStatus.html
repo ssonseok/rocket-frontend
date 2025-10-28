@@ -15,29 +15,17 @@
         .sb-sidenav-dark .nav-link { color: rgba(255, 255, 255, 0.8); }
         .sb-sidenav-dark .nav-link:hover { color: #fff; }
         .sb-sidenav-dark .nav-link.active { color: #fff; background-color: rgba(255, 255, 255, 0.15); }
+
+        /* 🚨 추가: 버튼과 로딩 인디케이터를 담는 영역 스타일 */
+        #testArea { text-align: left; }
+        #testButtonContainer { display: flex; align-items: center; justify-content: flex-start; }
+        #loadingIndicator { margin-left: 15px; }
     </style>
 </head>
 <body class="sb-nav-fixed">
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-info">
     <a class="navbar-brand ps-3" href="../adminMenu/adminMenu.html">관리자 모드</a>
     <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
-    <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-        <div class="input-group">
-            <input class="form-control" type="text" placeholder="검색..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
-            <button class="btn btn-light" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
-        </div>
-    </form>
-    <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="#!">설정</a></li>
-                <li><a class="dropdown-item" href="#!">활동 로그</a></li>
-                <li><hr class="dropdown-divider" /></li>
-                <li><a class="dropdown-item" href="#!">로그아웃</a></li>
-            </ul>
-        </li>
-    </ul>
 </nav>
 
 <div id="layoutSidenav">
@@ -68,17 +56,6 @@
                         회원 관리
                     </a>
 
-                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseReports" aria-expanded="false" aria-controls="collapseReports">
-                        <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                        데이터 리포트
-                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                    </a>
-                    <div class="collapse" id="collapseReports" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
-                        <nav class="sb-sidenav-menu-nested nav">
-                            <a class="nav-link" href="#!">일간 통계</a>
-                            <a class="nav-link" href="#!">월간 분석</a>
-                        </nav>
-                    </div>
                 </div>
             </div>
             <div class="sb-sidenav-footer">
@@ -116,32 +93,32 @@
 
                             <div id="testArea" class="card shadow mb-4">
                                 <div class="card-header"><i class="fas fa-plug me-1"></i> 장치 연결 및 데이터 테스트</div>
-                                <div class="card-body text-center">
-                                    <p id="testStatusMessage" class="lead mb-3">테스트를 실행하여 엣지 장치와의 통신 상태를 확인하세요.</p>
-                                    <button id="testButton" disabled class="btn btn-warning btn-lg">
-                                        <i class="fas fa-play me-2"></i> 연결 테스트 실행 (시리얼 로드 필요)
-                                    </button>
-                                    <div id="loadingIndicator" style="display: none; color: blue; margin-top: 15px;">
-                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                        테스트 중입니다. 최대 5초 소요...
+                                <div class="card-body">
+                                    <div id="testButtonContainer">
+                                        <button id="testButton" disabled class="btn btn-warning btn-lg">
+                                            <i class="fas fa-play me-2"></i> 연결 테스트 실행
+                                        </button>
+                                        <div id="loadingIndicator" style="display: none; color: blue;">
+                                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            테스트 중...
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div id="resultContainer" style="display: none;">
-                                <div class="card shadow mb-4">
-                                    <div class="card-header bg-success text-white"><i class="fas fa-check-circle me-1"></i> 최근 테스트 결과 상세</div>
-                                    <div class="card-body">
-                                        <div id="testResultDetail">
-                                        </div>
+                            <div id="resultContainer" class="card shadow mb-4">
+                                <div class="card-header"><i class="fas fa-clipboard-list me-1"></i> 테스트 결과 상세</div>
+                                <div class="card-body">
+                                    <div id="testResultDetail">
+                                        <p class="text-muted">연결 테스트를 실행하면 결과가 표시됩니다.</p>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="text-center mb-5">
-                                    <button onclick="history.back()" class="btn btn-secondary btn-lg">
-                                        <i class="fas fa-arrow-left me-2"></i> 목록으로 돌아가기
-                                    </button>
-                                </div>
+                            <div class="text-center mb-5">
+                                <button onclick="history.back()" class="btn btn-secondary btn-lg">
+                                    <i class="fas fa-arrow-left me-2"></i> 목록으로 돌아가기
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -150,14 +127,6 @@
         </main>
 
         <footer class="py-4 bg-light mt-auto">
-            <div class="container-fluid px-4">
-                <div class="d-flex align-items-center justify-content-between small">
-                    <div class="text-muted">Copyright &copy; Your Website 2023</div>
-                    <div>
-                        <a href="#">Privacy Policy</a> &middot; <a href="#">Terms &amp; Conditions</a>
-                    </div>
-                </div>
-            </div>
         </footer>
     </div>
 </div>
@@ -175,10 +144,10 @@
     const deviceNameEl = document.getElementById('deviceName');
     const deviceSerialEl = document.getElementById('deviceSerial');
 
-    const testStatusMessageEl = document.getElementById('testStatusMessage');
+    // 🚨 불필요한 요소 제거: testStatusMessageEl 삭제
     const testButtonEl = document.getElementById('testButton');
     const loadingIndicatorEl = document.getElementById('loadingIndicator');
-    const resultContainerEl = document.getElementById('resultContainer');
+    // 🚨 resultContainerEl 대신 testResultDetailEl만 사용 (resultContainer는 항상 보이게)
     const testResultDetailEl = document.getElementById('testResultDetail');
 
     /**
@@ -190,13 +159,13 @@
     }
 
     /**
-     * 상태 문자열/불리언에 따라 Bootstrap 배지 클래스를 반환합니다.
+     * 상태 문자열에 따라 Bootstrap 배지 클래스를 반환합니다.
      */
     function getStatusBadgeClass(status) {
-        if (status === true || status === 'CONNECTED' || status === 'success' || status === 'OK') {
+        if (status === 'OK' || status === 'SUCCESS') {
             return 'bg-success';
         }
-        if (status === false || status === 'DISCONNECTED' || status === 'ERROR' || status === 'fail') {
+        if (status === 'FAIL' || status === 'DISCONNECTED' || status === 'TIMEOUT' || status === 'ERROR_DATA' || status === 'INTERNAL_ERROR') {
             return 'bg-danger';
         }
         return 'bg-warning';
@@ -205,94 +174,58 @@
     /**
      * 테스트 결과를 화면에 표시합니다. (Admin_DeviceStatusTestDTO 사용)
      */
-    function displayStatusResult(resultDto, isInitialLoad = false) {
+    function displayStatusResult(resultDto) {
         // 1. 장치명 업데이트
-        deviceNameEl.textContent = resultDto.deviceName || "이름 없음";
+        deviceNameEl.textContent = resultDto.name || "이름 없음";
 
-        // 2. 최종 상태 판단
-        const isSuccess = resultDto.dataStatus === 'OK' && resultDto.status === 'success';
-        const statusText = isSuccess ? '성공' : '실패';
+        // 2. 최종 상태 판단 및 배지 클래스
+        const isSuccess = resultDto.status === 'SUCCESS' && resultDto.dataStatus === 'OK';
         const statusBadgeClass = isSuccess ? 'success' : 'danger';
 
-        // 마지막 데이터 수신 시간 포맷팅
-        const lastDataTime = resultDto.lastDataReceived
-            ? new Date(resultDto.lastDataReceived).toLocaleString('ko-KR')
-            : '수신 기록 없음';
+        // Edge Gateway 상태 응답 (STATUS_CHECK_RESPONSE)
+        const statusResponseText = resultDto.responseData || '응답 데이터 없음';
 
-        // 테스트 실행 시에만 메시지 업데이트
-        if (!isInitialLoad) {
-            testStatusMessageEl.textContent = isSuccess ? '✅ 통신 테스트 완료' : `❌ 통신 테스트 실패: ${resultDto.message || '응답 오류'}`;
-        } else {
-            // 초기 로드시에는 기본 메시지 유지
-            testStatusMessageEl.textContent = '테스트를 실행하여 엣지 장치와의 통신 상태를 확인하세요.';
-        }
+        // 🚨 최근 측정 데이터 (latestDataStream 필드가 백엔드 DTO에 추가되었다고 가정)
+        // 이 데이터를 '응답 원본'으로 표시하도록 변경합니다.
+        const latestDataText = resultDto.latestDataStream || statusResponseText;
 
-        // 3. HTML 상세 내용 구성
-        // dataPayload는 JSON 포맷으로 예쁘게 표시
-        let dataPayloadText = resultDto.dataPayload
-            ? JSON.stringify(resultDto.dataPayload, null, 2)
-            : '응답 데이터 없음';
-
-        // 테스트 실행 시에만 상단에 결과 박스 표시
-        const resultAlert = !isInitialLoad ?
-                `<div class="alert alert-${statusBadgeClass}" role="alert">
-                    <h4 class="alert-heading">통신 테스트 결과: ${statusText}</h4>
-                </div>`
-                : '';
-
+        // 3. HTML 상세 내용 구성: 요청하신 세 가지 항목만 표시
         testResultDetailEl.innerHTML = `
-            ${resultAlert}
+            <div class="alert alert-${statusBadgeClass}" role="alert">
+                <h5 class="alert-heading">테스트 상태: ${resultDto.dataStatus}</h5>
+            </div>
 
             <dl class="row">
-                <dt class="col-sm-4">DB 등록 상태:</dt>
-                <dd class="col-sm-8"><span class="badge ${getStatusBadgeClass(resultDto.dbStatus)}">${resultDto.dbStatus || 'N/A'}</span></dd>
-
-                <dt class="col-sm-4">웹소켓 연결:</dt>
-                <dd class="col-sm-8"><span class="badge ${getStatusBadgeClass(resultDto.wsConnected)}">${resultDto.wsConnected ? '연결됨' : '미연결'}</span></dd>
-
-                <dt class="col-sm-4">마지막 데이터 수신:</dt>
-                <dd class="col-sm-8">${lastDataTime}</dd>
-
                 <dt class="col-sm-4">엣지 응답 속도:</dt>
-                <dd class="col-sm-8">${resultDto.responseTimeMs !== undefined ? resultDto.responseTimeMs + ' ms' : 'N/A'}</dd>
+                <dd class="col-sm-8"><span class="badge bg-primary">${resultDto.responseTimeMs !== undefined ? resultDto.responseTimeMs + ' ms' : 'N/A'}</span></dd>
 
                 <dt class="col-sm-4">응답 데이터 상태:</dt>
-                <dd class="col-sm-8 text-${getStatusBadgeClass(resultDto.dataStatus)}">${resultDto.dataStatus || 'N/A'}</dd>
+                <dd class="col-sm-8"><span class="badge ${getStatusBadgeClass(resultDto.dataStatus)}">${resultDto.dataStatus || 'N/A'}</span></dd>
             </dl>
 
             <h5 class="mt-4">엣지 응답 원본 (dataPayload)</h5>
-            <pre class="bg-light p-3 border rounded" style="white-space: pre-wrap; word-break: break-all;">${dataPayloadText}</pre>
+            <pre class="bg-light p-3 border rounded" style="white-space: pre-wrap; word-break: break-all;">${latestDataText}</pre>
         `;
-        resultContainerEl.style.display = 'block';
     }
 
     /**
      * 백엔드 API를 호출하여 상태를 가져오고 화면에 표시합니다.
-     * 이 함수는 최초 로드와 테스트 실행 시 모두 사용됩니다.
-     * @param {boolean} isInitialLoad - 초기 로드인지 여부
      */
-    async function fetchAndDisplayStatus(isInitialLoad = false) {
+    async function fetchAndDisplayStatus() {
         if (!deviceSerialNumber) return;
 
-        // 💡 로딩 및 버튼 제어
         testButtonEl.disabled = true;
         loadingIndicatorEl.style.display = 'block';
 
-        if (!isInitialLoad) {
-            testStatusMessageEl.textContent = '테스트 명령을 전송하고 응답을 기다리는 중입니다...';
-        }
-
-
         try {
-            // ⚠️ 통합된 /status/{serial} API 호출
             const url = `${API_HOST}${API_BASE_URL}/status/${deviceSerialNumber}`;
             const response = await fetch(url);
 
             if (!response.ok) throw new Error(`장치 상태 조회 실패. (HTTP ${response.status})`);
 
-            const resultDto = await response.json(); // Admin_DeviceStatusTestDTO 수신
+            const resultDto = await response.json();
 
-            displayStatusResult(resultDto, isInitialLoad);
+            displayStatusResult(resultDto); // 결과 표시
 
         } catch (error) {
             let errorMessage = error.message;
@@ -300,14 +233,15 @@
                 errorMessage = '네트워크 연결 오류 또는 서버 접근 불가.';
             }
 
-            // 오류 메시지 업데이트
-            const prefix = isInitialLoad ? '⚠️ 장치 상태 초기 로드 실패' : '❌ 테스트 실행 중 오류 발생';
-            testStatusMessageEl.textContent = `${prefix}: ${errorMessage}`;
+            // 오류 발생 시에도 DTO 구조에 맞춰 실패 메시지 표시
+            testResultDetailEl.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <h5 class="alert-heading">통신 테스트 실패</h5>
+                    <p>오류 내용: ${errorMessage}</p>
+                </div>
+            `;
 
-            resultContainerEl.style.display = 'block';
-            testResultDetailEl.innerHTML = `<p class="text-danger">통신 오류: ${errorMessage}</p>`;
         } finally {
-            // 💡 완료 후 버튼/로딩 상태 복구
             loadingIndicatorEl.style.display = 'none';
             testButtonEl.disabled = false;
         }
@@ -316,20 +250,22 @@
 
     // --- Event Listener & Initialization ---
     document.addEventListener('DOMContentLoaded', () => {
-        // 1. 시리얼 번호 초기화
         deviceSerialNumber = getSerialNumberFromUrl();
 
         if (deviceSerialNumber) {
             deviceSerialEl.textContent = deviceSerialNumber;
+            testButtonEl.disabled = false;
+            testButtonEl.innerHTML = `<i class="fas fa-play me-2"></i> 연결 테스트 실행`;
+
+            // 초기 로드 시에도 한 번 실행하여 기본 정보만 표시
+            fetchAndDisplayStatus();
+
+        } else {
+            testResultDetailEl.innerHTML = '<p class="text-danger">URL에서 장치 시리얼 번호를 찾을 수 없습니다.</p>';
         }
 
-        // 2. 초기 상태 로드 (isInitialLoad = true)
-        fetchAndDisplayStatus(true);
-
-        // 3. 테스트 버튼 이벤트 리스너 연결 (isInitialLoad = false)
-        testButtonEl.addEventListener('click', () => fetchAndDisplayStatus(false));
+        testButtonEl.addEventListener('click', () => fetchAndDisplayStatus());
     });
 </script>
-
 </body>
 </html>
