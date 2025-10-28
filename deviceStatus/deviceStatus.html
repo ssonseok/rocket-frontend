@@ -166,16 +166,15 @@
 <script src="../src/js/scripts.js"></script>
 
 <script>
-    // Javascript 코드 시작
-
-    const API_BASE_URL = "/api/device";
     const API_HOST = "http://localhost:8080";
+    const API_BASE_URL = "/api/device";
 
     let deviceSerialNumber = null;
 
     // --- DOM Elements ---
     const deviceNameEl = document.getElementById('deviceName');
     const deviceSerialEl = document.getElementById('deviceSerial');
+
     const testStatusMessageEl = document.getElementById('testStatusMessage');
     const testButtonEl = document.getElementById('testButton');
     const loadingIndicatorEl = document.getElementById('loadingIndicator');
@@ -191,132 +190,124 @@
     }
 
     /**
-     * 장치 기본 상태 정보를 로드합니다. (GET /status/{serial})
+     * 상태 문자열/불리언에 따라 Bootstrap 배지 클래스를 반환합니다.
      */
-    async function loadDeviceStatus() {
-        deviceSerialNumber = getSerialNumberFromUrl();
-        if (!deviceSerialNumber) {
-            deviceNameEl.textContent = '오류: 시리얼 번호가 없습니다.';
-            return;
+    function getStatusBadgeClass(status) {
+        if (status === true || status === 'CONNECTED' || status === 'success' || status === 'OK') {
+            return 'bg-success';
         }
-
-        deviceSerialEl.textContent = deviceSerialNumber;
-
-        try {
-            const url = `${API_HOST}${API_BASE_URL}/status/${deviceSerialNumber}`;
-            // ❗❗❗ API 호출 시 인증 토큰이 필요하다면 여기에 추가해야 합니다.
-            const token = localStorage.getItem('token');
-            const response = await fetch(url, {
-                 headers: {
-                    'Authorization': token ? `Bearer ${token}` : ''
-                }
-            });
-
-            if (!response.ok) throw new Error("장치 정보를 찾을 수 없습니다.");
-
-            const data = await response.json();
-
-            deviceNameEl.textContent = data.deviceName || '이름 없음';
-
-            testButtonEl.textContent = '연결 테스트 실행';
-            testButtonEl.disabled = false;
-        } catch (error) {
-            deviceNameEl.textContent = `로드 실패: ${error.message}`;
-            testButtonEl.disabled = true;
-            testButtonEl.textContent = '장치 정보 로드 실패로 테스트 불가';
+        if (status === false || status === 'DISCONNECTED' || status === 'ERROR' || status === 'fail') {
+            return 'bg-danger';
         }
+        return 'bg-warning';
     }
 
     /**
-     * 테스트 성공 시 상세 결과를 로드하여 표시합니다. (GET /test/result/{serial})
+     * 테스트 결과를 화면에 표시합니다. (Admin_DeviceStatusTestDTO 사용)
      */
-    async function loadTestResultDetail() {
-        try {
-            const url = `${API_HOST}${API_BASE_URL}/test/result/${deviceSerialNumber}`;
-            const token = localStorage.getItem('token');
-            const response = await fetch(url, {
-                 headers: {
-                    'Authorization': token ? `Bearer ${token}` : ''
-                }
-            });
+    function displayStatusResult(resultDto, isInitialLoad = false) {
+        // 1. 장치명 업데이트
+        deviceNameEl.textContent = resultDto.deviceName || "이름 없음";
 
-            if (!response.ok) throw new Error("테스트 상세 결과 조회 실패.");
+        // 2. 최종 상태 판단
+        const isSuccess = resultDto.dataStatus === 'OK' && resultDto.status === 'success';
+        const statusText = isSuccess ? '성공' : '실패';
+        const statusBadgeClass = isSuccess ? 'success' : 'danger';
 
-            const result = await response.json();
-            displayTestResult(result);
+        // 마지막 데이터 수신 시간 포맷팅
+        const lastDataTime = resultDto.lastDataReceived
+            ? new Date(resultDto.lastDataReceived).toLocaleString('ko-KR')
+            : '수신 기록 없음';
 
-        } catch (error) {
-            testResultDetailEl.innerHTML = `<p class="text-danger">상세 결과 로드 중 오류 발생: ${error.message}</p>`;
-        } finally {
-            resultContainerEl.style.display = 'block';
+        // 테스트 실행 시에만 메시지 업데이트
+        if (!isInitialLoad) {
+            testStatusMessageEl.textContent = isSuccess ? '✅ 통신 테스트 완료' : `❌ 통신 테스트 실패: ${resultDto.message || '응답 오류'}`;
+        } else {
+            // 초기 로드시에는 기본 메시지 유지
+            testStatusMessageEl.textContent = '테스트를 실행하여 엣지 장치와의 통신 상태를 확인하세요.';
         }
-    }
 
-    /**
-     * 테스트 결과를 화면에 표시합니다.
-     * 요청하신 응답 데이터 상태, 응답 속도, 응답 데이터 전문만 표시
-     */
-    function displayTestResult(result) {
-        let responseDataText = result.responseData || "응답 데이터 없음";
+        // 3. HTML 상세 내용 구성
+        // dataPayload는 JSON 포맷으로 예쁘게 표시
+        let dataPayloadText = resultDto.dataPayload
+            ? JSON.stringify(resultDto.dataPayload, null, 2)
+            : '응답 데이터 없음';
 
-        // 부트스트랩 DL 스타일을 사용
+        // 테스트 실행 시에만 상단에 결과 박스 표시
+        const resultAlert = !isInitialLoad ?
+                `<div class="alert alert-${statusBadgeClass}" role="alert">
+                    <h4 class="alert-heading">통신 테스트 결과: ${statusText}</h4>
+                </div>`
+                : '';
+
         testResultDetailEl.innerHTML = `
-            <div class="alert alert-${result.status === '성공' ? 'success' : 'danger'}" role="alert">
-                <h4 class="alert-heading">테스트 결과: ${result.status}</h4>
-            </div>
-            <dl class="row">
-                <dt class="col-sm-4">응답 속도:</dt>
-                <dd class="col-sm-8">${result.responseTimeMs} ms</dd>
+            ${resultAlert}
 
-                <dt class="col-sm-4">응답 데이터 이상 유무 :</dt>
-                <dd class="col-sm-8 text-${result.dataStatus === 'OK' ? 'success' : 'danger'}">${result.dataStatus}</dd>
+            <dl class="row">
+                <dt class="col-sm-4">DB 등록 상태:</dt>
+                <dd class="col-sm-8"><span class="badge ${getStatusBadgeClass(resultDto.dbStatus)}">${resultDto.dbStatus || 'N/A'}</span></dd>
+
+                <dt class="col-sm-4">웹소켓 연결:</dt>
+                <dd class="col-sm-8"><span class="badge ${getStatusBadgeClass(resultDto.wsConnected)}">${resultDto.wsConnected ? '연결됨' : '미연결'}</span></dd>
+
+                <dt class="col-sm-4">마지막 데이터 수신:</dt>
+                <dd class="col-sm-8">${lastDataTime}</dd>
+
+                <dt class="col-sm-4">엣지 응답 속도:</dt>
+                <dd class="col-sm-8">${resultDto.responseTimeMs !== undefined ? resultDto.responseTimeMs + ' ms' : 'N/A'}</dd>
+
+                <dt class="col-sm-4">응답 데이터 상태:</dt>
+                <dd class="col-sm-8 text-${getStatusBadgeClass(resultDto.dataStatus)}">${resultDto.dataStatus || 'N/A'}</dd>
             </dl>
 
-            <h3 class="mt-4">응답 데이터</h3>
-            <pre class="bg-light p-3 border rounded" style="white-space: pre-wrap; word-break: break-all;">
-${responseDataText}
-            </pre>
+            <h5 class="mt-4">엣지 응답 원본 (dataPayload)</h5>
+            <pre class="bg-light p-3 border rounded" style="white-space: pre-wrap; word-break: break-all;">${dataPayloadText}</pre>
         `;
-
-        // WS 상태 업데이트 로직 제거
+        resultContainerEl.style.display = 'block';
     }
 
     /**
-     * 연결 테스트를 실행합니다. (GET /test/{serial})
+     * 백엔드 API를 호출하여 상태를 가져오고 화면에 표시합니다.
+     * 이 함수는 최초 로드와 테스트 실행 시 모두 사용됩니다.
+     * @param {boolean} isInitialLoad - 초기 로드인지 여부
      */
-    async function runConnectionTest() {
+    async function fetchAndDisplayStatus(isInitialLoad = false) {
+        if (!deviceSerialNumber) return;
+
+        // 💡 로딩 및 버튼 제어
         testButtonEl.disabled = true;
         loadingIndicatorEl.style.display = 'block';
-        testStatusMessageEl.textContent = '테스트 명령을 전송하고 응답을 기다리는 중입니다...';
-        testResultDetailEl.innerHTML = '';
-        resultContainerEl.style.display = 'none';
+
+        if (!isInitialLoad) {
+            testStatusMessageEl.textContent = '테스트 명령을 전송하고 응답을 기다리는 중입니다...';
+        }
+
 
         try {
-            const url = `${API_HOST}${API_BASE_URL}/test/${deviceSerialNumber}`;
-            const token = localStorage.getItem('token');
-            const response = await fetch(url, {
-                 headers: {
-                    'Authorization': token ? `Bearer ${token}` : ''
-                }
-            });
+            // ⚠️ 통합된 /status/{serial} API 호출
+            const url = `${API_HOST}${API_BASE_URL}/status/${deviceSerialNumber}`;
+            const response = await fetch(url);
 
-            const resultJson = await response.json();
-            const status = resultJson.status;
+            if (!response.ok) throw new Error(`장치 상태 조회 실패. (HTTP ${response.status})`);
 
-            if (status === 'success') {
-                testStatusMessageEl.textContent = '테스트 성공';
-                await loadTestResultDetail();
-            } else {
-                testStatusMessageEl.textContent = `테스트 실패: ${resultJson.message || '엣지 연결 실패 또는 타임아웃 발생.'}`;
-                resultContainerEl.style.display = 'block';
-                testResultDetailEl.innerHTML = `<p class="text-danger">연결 실패 또는 타임아웃: ${resultJson.message || '상세 정보 없음.'}</p>`;
-            }
+            const resultDto = await response.json(); // Admin_DeviceStatusTestDTO 수신
+
+            displayStatusResult(resultDto, isInitialLoad);
 
         } catch (error) {
-            testStatusMessageEl.textContent = `테스트 실행 중 심각한 오류 발생: ${error.message}`;
+            let errorMessage = error.message;
+            if (errorMessage.includes('Failed to fetch')) {
+                errorMessage = '네트워크 연결 오류 또는 서버 접근 불가.';
+            }
+
+            // 오류 메시지 업데이트
+            const prefix = isInitialLoad ? '⚠️ 장치 상태 초기 로드 실패' : '❌ 테스트 실행 중 오류 발생';
+            testStatusMessageEl.textContent = `${prefix}: ${errorMessage}`;
+
             resultContainerEl.style.display = 'block';
-            testResultDetailEl.innerHTML = `<p class="text-danger">통신 오류: ${error.message}</p>`;
+            testResultDetailEl.innerHTML = `<p class="text-danger">통신 오류: ${errorMessage}</p>`;
         } finally {
+            // 💡 완료 후 버튼/로딩 상태 복구
             loadingIndicatorEl.style.display = 'none';
             testButtonEl.disabled = false;
         }
@@ -324,26 +315,21 @@ ${responseDataText}
 
 
     // --- Event Listener & Initialization ---
-
     document.addEventListener('DOMContentLoaded', () => {
-        // 1. 초기 정보 로드
-        loadDeviceStatus();
+        // 1. 시리얼 번호 초기화
+        deviceSerialNumber = getSerialNumberFromUrl();
 
-        // 2. 테스트 버튼 이벤트 리스너 연결
-        testButtonEl.addEventListener('click', runConnectionTest);
+        if (deviceSerialNumber) {
+            deviceSerialEl.textContent = deviceSerialNumber;
+        }
+
+        // 2. 초기 상태 로드 (isInitialLoad = true)
+        fetchAndDisplayStatus(true);
+
+        // 3. 테스트 버튼 이벤트 리스너 연결 (isInitialLoad = false)
+        testButtonEl.addEventListener('click', () => fetchAndDisplayStatus(false));
     });
-
-    // 탑바의 로그아웃 버튼 이벤트 리스너 추가 (템플릿의 표준 JS 로직)
-    const logoutBtn = document.querySelector('.dropdown-menu .dropdown-item:last-child');
-    if (logoutBtn && logoutBtn.textContent.trim() === '로그아웃') {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if(confirm('로그아웃 하시겠습니까?')) {
-                localStorage.removeItem('token');
-                window.location.href = '../login.html';
-            }
-        });
-    }
 </script>
+
 </body>
 </html>
