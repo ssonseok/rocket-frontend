@@ -263,6 +263,8 @@
     let expandedSensorId = null;
     const token = localStorage.getItem('token');
 
+    let isRestoring = false;
+
 async function authFetch(url, options = {}) {
   const token = localStorage.getItem('token');
 
@@ -309,12 +311,10 @@ async function authFetch(url, options = {}) {
   }
 
 async function saveGraphPositionToDB(dragId, left, top, width, height) {
-  try {
-    // 서버가 배열을 기대하므로 배열로 감싸서 전송
-    const payload = [
-      { dragId, left, top, width, height }
-    ];
+  if (isRestoring) return; // ✅ 복원 중에는 저장하지 않음
 
+  try {
+    const payload = [{ dragId, left, top, width, height }];
     const res = await authFetch(`http://localhost:8080/api/user/graph-layout-save`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -322,7 +322,7 @@ async function saveGraphPositionToDB(dragId, left, top, width, height) {
     });
 
     if (!res.ok) throw new Error('그래프 위치 저장 실패: ' + res.status);
-    console.log(`Graph ${dragId} position saved`);
+    console.log(`📍 위치 저장 완료: ${dragId} (${left},${top}) ${width}x${height}`);
   } catch (err) {
     console.error(err);
   }
@@ -778,7 +778,12 @@ function addGraphToDropZone(sensor, dragId, left = 0, top = 0) {
   return graphBlock; // ✅ 위치/크기 복원용 반환
 }
 
-    async function saveActiveGraphs() {
+async function saveActiveGraphs() {
+  if (isRestoring) {
+    console.log('⏸️ 복원 중이므로 저장 생략');
+    return;
+  }
+
   const dragIds = Object.keys(activeCharts);
   try {
     await authFetch('http://localhost:8080/api/user/graph-layout', {
@@ -786,7 +791,7 @@ function addGraphToDropZone(sensor, dragId, left = 0, top = 0) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ activeGraphs: dragIds }),
     });
-    console.log('🧠 그래프 상태 서버에 저장 완료');
+    console.log('🧠 그래프 상태 서버에 저장 완료:', dragIds);
   } catch (e) {
     console.error('⚠️ 그래프 상태 저장 실패:', e);
   }
@@ -794,21 +799,19 @@ function addGraphToDropZone(sensor, dragId, left = 0, top = 0) {
 
 async function restoreSavedGraphs() {
   try {
-    // 1️⃣ 저장된 활성 그래프 목록 불러오기
+    isRestoring = true; // ✅ 복원 중 시작
+
     const res = await authFetch('http://localhost:8080/api/user/graph-layout');
     if (!res.ok) throw new Error('그래프 레이아웃 불러오기 실패');
     const data = await res.json();
     const savedGraphIds = data.activeGraphs || [];
 
-    // 2️⃣ 그래프 위치/크기 정보 불러오기
     const layoutRes = await authFetch('http://localhost:8080/api/user/graph-layout-save');
     if (!layoutRes.ok) throw new Error('그래프 레이아웃 정보 불러오기 실패');
     const layouts = await layoutRes.json();
 
     console.log('🧠 복원 대상 그래프:', savedGraphIds);
-    console.log('📐 저장된 레이아웃:', layouts);
 
-    // 3️⃣ 각 그래프 복원
     savedGraphIds.forEach(dragId => {
       const sensor = findSensorByDragId(dragId);
       if (!sensor) {
@@ -816,17 +819,13 @@ async function restoreSavedGraphs() {
         return;
       }
 
-      // 해당 그래프의 저장된 위치/크기 찾기
       const layout = layouts.find(l => l.dragId === dragId);
       const left = layout?.posLeft ?? 0;
       const top = layout?.posTop ?? 0;
       const width = layout?.width ?? 400;
       const height = layout?.height ?? 200;
 
-      // 그래프 생성 및 반환
       const graphBlock = addGraphToDropZone(sensor, dragId, left, top);
-
-      // 위치와 크기 적용
       if (graphBlock) {
         graphBlock.style.left = `${left}px`;
         graphBlock.style.top = `${top}px`;
@@ -836,8 +835,15 @@ async function restoreSavedGraphs() {
     });
 
     console.log('✅ 그래프 복원 완료');
+
   } catch (e) {
     console.error('⚠️ 그래프 상태 복원 실패:', e);
+  } finally {
+    // ✅ 복원 종료 후 한 번만 저장 실행
+    setTimeout(() => {
+      isRestoring = false;
+      saveActiveGraphs();
+    }, 500);
   }
 }
 
