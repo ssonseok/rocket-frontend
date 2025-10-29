@@ -18,9 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>${device.deviceSerialNumber}</td>
                     <td>${createdDate}</td>
                     <td>${dataList}</td>
-                    <td><button onclick="modifyDevice('${device.deviceSerialNumber}')">수정</button></td>
-                    <td><button onclick="deleteDevice('${device.deviceSerialNumber}', '${device.deviceName}')">삭제</button></td>
-                    <td><button onclick="statusDevice('${device.deviceSerialNumber}')">상태보기</button></td>
+                    <td><button class="btn btn-success btn-sm" onclick="modifyDevice('${device.deviceSerialNumber}')">수정</button></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteDevice('${device.deviceSerialNumber}', '${device.deviceName}')">삭제</button></td>
+                    <td><button class="btn btn-primary btn-sm" onclick="statusDevice('${device.deviceSerialNumber}')">상태보기</button></td>
+
                 `;
                 tableBody.appendChild(row);
             });

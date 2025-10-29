@@ -1,125 +1,105 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>장비 목록 | 관리자 모드</title>
 
-    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link
-            href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-            rel="stylesheet">
-    <link href="/src/adminCss/sb-admin-2.min.css" rel="stylesheet">
+    <link href="../src/css/styles.css" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 
     <style>
-        .bg-info {
-            background-color: #007bff !important; /* 부트스트랩 info 색상 */
-        }
-        .sb-sidenav-dark, .sb-sidenav-dark .sb-sidenav-menu-heading {
-            /* 사이드바 배경 및 폰트 색상 조정 */
-            background-color: #007bff; /* primary color */
-            color: rgba(255, 255, 255, 0.5);
-        }
-        .sb-sidenav-dark .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-        }
-        .sb-sidenav-dark .nav-link:hover {
-            color: #fff;
-        }
-        .sb-sidenav-dark .nav-link.active {
-            color: #fff;
-            background-color: rgba(255, 255, 255, 0.15);
-        }
+        /* 네비게이션 및 사이드바 색상 일관성 유지 (bg-info: #007bff) */
+        .bg-info { background-color: #007bff !important; }
+        .sb-sidenav-dark, .sb-sidenav-dark .sb-sidenav-menu-heading { background-color: #007bff; color: rgba(255, 255, 255, 0.5); }
+        .sb-sidenav-dark .nav-link { color: rgba(255, 255, 255, 0.8); }
+        .sb-sidenav-dark .nav-link:hover { color: #fff; }
+        .sb-sidenav-dark .nav-link.active { color: #fff; background-color: rgba(255, 255, 255, 0.15); }
     </style>
 </head>
-
-<body id="page-top">
-
-<div id="wrapper">
-
-    <ul class="navbar-nav bg-info sidebar sidebar-dark accordion" id="accordionSidebar">
-
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/adminMenu/adminMenu.html">
-            <div class="sidebar-brand-icon rotate-n-15">
-                <i class="fas fa-laugh-wink"></i>
-            </div>
-            <div class="sidebar-brand-text mx-3">관리자 모드</div>
-        </a>
-
-        <hr class="sidebar-divider my-0">
-
-        <li class="nav-item">
-            <a class="nav-link" href="/adminMenu/adminMenu.html">
-                <i class="fas fa-fw fa-tachometer-alt"></i>
-                <span>대시보드 / 메뉴</span></a>
-        </li>
-
-        <hr class="sidebar-divider">
-
-        <div class="sidebar-heading">
-            메인 관리
+<body class="sb-nav-fixed">
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-info">
+    <a class="navbar-brand ps-3" href="/adminMenu/adminMenu.html">관리자 모드</a>
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+    <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
+        <div class="input-group">
+            <input class="form-control" type="text" placeholder="검색..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
+            <button class="btn btn-light" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
         </div>
-
-        <li class="nav-item">
-            <a class="nav-link" href="../deviceRegister/deviceRegister.html">
-                <i class="fas fa-plus-circle"></i>
-                <span>장비 등록</span></a>
+    </form>
+    <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="#!">설정</a></li>
+                <li><a class="dropdown-item" href="#!">활동 로그</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" href="#!">로그아웃</a></li>
+            </ul>
         </li>
-
-        <li class="nav-item active">
-            <a class="nav-link" href="../deviceList/deviceList.html">
-                <i class="fas fa-list-ul"></i>
-                <span>장비 목록 확인</span></a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="../userManage/userManage.html">
-                <i class="fas fa-users-cog"></i>
-                <span>회원 관리</span></a>
-        </li>
-
-        <hr class="sidebar-divider d-none d-md-block">
-
-        <div class="text-center d-none d-md-inline">
-            <button class="rounded-circle border-0" id="sidebarToggle"></button>
-        </div>
-
     </ul>
-    <div id="content-wrapper" class="d-flex flex-column">
+</nav>
 
-        <div id="content">
+<div id="layoutSidenav">
+    <div id="layoutSidenav_nav">
+        <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+            <div class="sb-sidenav-menu">
+                <div class="nav">
+                    <div class="sb-sidenav-menu-heading">CORE</div>
+                    <a class="nav-link" href="/adminMenu/adminMenu.html">
+                        <div class="sb-nav-link-icon"><i class="fas fa-fw fa-tachometer-alt"></i></div>
+                        대시보드 / 메뉴
+                    </a>
 
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 shadow">
+                    <div class="sb-sidenav-menu-heading">관리 기능</div>
 
-                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                    <i class="fa fa-bars"></i>
-                </button>
+                    <a class="nav-link" href="../deviceRegister/deviceRegister.html">
+                        <div class="sb-nav-link-icon"><i class="fas fa-plus-circle"></i></div>
+                        장비 등록
+                    </a>
 
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <button id="btn-logout" class="btn btn-sm btn-outline-secondary">
-                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
-                            로그아웃
-                        </button>
-                    </li>
-                </ul>
+                    <a class="nav-link active" href="../deviceList/deviceList.html">
+                        <div class="sb-nav-link-icon"><i class="fas fa-list-ul"></i></div>
+                        장비 목록 확인
+                    </a>
 
-            </nav>
-            <div class="container-fluid">
+                    <a class="nav-link" href="../userManage/userManage.html">
+                        <div class="sb-nav-link-icon"><i class="fas fa-users-cog"></i></div>
+                        회원 관리
+                    </a>
 
-                <h1 class="h3 mb-4 text-gray-800">장비 목록</h1>
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseReports" aria-expanded="false" aria-controls="collapseReports">
+                        <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                        데이터 리포트
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapseReports" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" href="#!">일간 통계</a>
+                            <a class="nav-link" href="#!">월간 분석</a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <div class="sb-sidenav-footer">
+                <div class="small">로그인 사용자:</div>
+                관리자 (Admin)
+            </div>
+        </nav>
+    </div>
 
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid px-4">
+                <h1 class="mt-4">장비 목록</h1>
                 <ol class="breadcrumb mb-4">
                     <li class="breadcrumb-item"><a href="/adminMenu/adminMenu.html">대시보드 / 메뉴</a></li>
                     <li class="breadcrumb-item active">장비 목록 확인</li>
                 </ol>
 
-
                 <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">등록된 장비 전체 목록</h6>
-                    </div>
+                    <div class="card-header"><i class="fas fa-table me-1"></i> 등록된 장비 전체 목록</div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -136,6 +116,26 @@
                                 </tr>
                                 </thead>
                                 <tbody id="device-table-body">
+                                <tr>
+                                    <td>1</td>
+                                    <td>센서 장치 A</td>
+                                    <td>DEV-001</td>
+                                    <td>2023-10-01</td>
+                                    <td>온도/습도</td>
+                                    <td><button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> 수정</button></td>
+                                    <td><button class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> 삭제</button></td>
+                                    <td><button class="btn btn-info btn-sm text-white"><i class="fas fa-eye"></i> 상태</button></td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>모터 제어기 B</td>
+                                    <td>DEV-002</td>
+                                    <td>2023-10-05</td>
+                                    <td>모터 RPM</td>
+                                    <td><button class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> 수정</button></td>
+                                    <td><button class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> 삭제</button></td>
+                                    <td><button class="btn btn-info btn-sm text-white"><i class="fas fa-eye"></i> 상태</button></td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -143,7 +143,7 @@
                 </div>
 
             </div>
-        </div>
+        </main>
         <footer class="py-4 bg-light mt-auto">
             <div class="container-fluid px-4">
                 <div class="d-flex align-items-center justify-content-between small">
@@ -156,14 +156,9 @@
         </footer>
     </div>
 </div>
-<a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-</a>
 
-<script src="/vendor/jquery/jquery.min.js"></script>
-<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
-<script src="/src/adminJs/sb-admin-2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="../src/js/scripts.js"></script>
 
 <script src="../deviceList/deviceList.js"></script>
 </body>
