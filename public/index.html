@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <meta name="description" content=""/>
+    <meta name="author" content=""/>
     <title>Dashboard - SB Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
-    <link href="/src/css/styles.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet"/>
+    <link href="/src/css/styles.css" rel="stylesheet"/>
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     <style>
         body {
@@ -46,7 +46,7 @@
         .dashboard-container {
           display: flex;
           gap: 10px;
-          height: 400px; /* 높이 조절 가능 */
+          height: 650px; /* 높이 조절 가능 */
           overflow: hidden;
         }
 
@@ -114,22 +114,27 @@
     <!-- Navbar Brand-->
     <a class="navbar-brand ps-3" href="/rocket-frontend/public/index.html">Start Bootstrap</a>
     <!-- Sidebar Toggle-->
-    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
+            class="fas fa-bars"></i></button>
     <!-- Navbar Search-->
     <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
         <div class="input-group">
-            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
+            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..."
+                   aria-describedby="btnNavbarSearch"/>
             <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
         </div>
     </form>
     <!-- Navbar-->
     <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown"
+               aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="#!">Settings</a></li>
                 <li><a class="dropdown-item" href="#!">Activity Log</a></li>
-                <li><hr class="dropdown-divider" /></li>
+                <li>
+                    <hr class="dropdown-divider"/>
+                </li>
                 <li><a class="dropdown-item" href="#!" onclick="logout()">로그아웃</a></li>
             </ul>
         </li>
@@ -146,29 +151,36 @@
                         Dashboard
                     </a>
                     <div class="sb-sidenav-menu-heading">Interface</div>
-                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts"
+                       aria-expanded="false" aria-controls="collapseLayouts">
                         <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
                         Layouts
                         <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                     </a>
-                    <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                    <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne"
+                         data-bs-parent="#sidenavAccordion">
                         <nav class="sb-sidenav-menu-nested nav">
                             <a class="nav-link" href="/rocket-frontend/public/history.html">History</a>
                             <a class="nav-link" href="/rocket-frontend/public/prediction.html">Prediction</a>
                         </nav>
                     </div>
-                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages"
+                       aria-expanded="false" aria-controls="collapsePages">
                         <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
                         Pages
                         <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                     </a>
-                    <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
+                    <div class="collapse" id="collapsePages" aria-labelledby="headingTwo"
+                         data-bs-parent="#sidenavAccordion">
                         <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
-                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseAuth" aria-expanded="false" aria-controls="pagesCollapseAuth">
+                            <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"
+                               data-bs-target="#pagesCollapseAuth" aria-expanded="false"
+                               aria-controls="pagesCollapseAuth">
                                 인증
                                 <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                             </a>
-                            <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
+                            <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne"
+                                 data-bs-parent="#sidenavAccordionPages">
                                 <nav class="sb-sidenav-menu-nested nav">
                                     <a class="nav-link" href="login.html">로그인</a>
                                     <a class="nav-link" href="findId.html">아이디찾기</a>
@@ -227,10 +239,12 @@
         </footer>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
 <script src="/src/js/scripts.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
+        crossorigin="anonymous"></script>
 <script>
     const MAX_POINTS = 20;
     const FETCH_INTERVAL_MS = 1000;
@@ -249,28 +263,38 @@
     let expandedSensorId = null;
     const token = localStorage.getItem('token');
 
-function authFetch(url, options = {}) {
+async function authFetch(url, options = {}) {
   const token = localStorage.getItem('token');
 
   if (!token) {
     alert('🔒 로그인 정보가 없습니다. 다시 로그인해주세요.');
     window.location.href = '/rocket-frontend/public/login.html';
-    return;  // 여기서 return 안하면 계속 함수 진행됨
+    return;
   }
 
-  const headers = {
-    ...options.headers,
-    'Authorization': `Bearer ${token}`
-  };
-
-  // options에 headers 덮어쓰기
   const fetchOptions = {
     ...options,
-    headers
+    headers: {
+      ...options.headers,
+      Authorization: `Bearer ${token}`,
+    },
   };
 
-  // fetch 결과 반환
-  return fetch(url, fetchOptions);
+  try {
+    const response = await fetch(url, fetchOptions);
+
+    if (response.status === 401) {
+      alert('🔒 인증이 만료되었습니다. 다시 로그인해주세요.');
+      localStorage.removeItem('token'); // 토큰 삭제
+      window.location.href = '/rocket-frontend/public/login.html';
+      return;
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Fetch 에러:', error);
+    throw error;
+  }
 }
 
     // ------------- 초기화 -------------
@@ -284,17 +308,42 @@ function authFetch(url, options = {}) {
     window.location.href = '/rocket-frontend/public/login.html';
   }
 
+async function saveGraphPositionToDB(dragId, left, top, width, height) {
+  try {
+    // 서버가 배열을 기대하므로 배열로 감싸서 전송
+    const payload = [
+      { dragId, left, top, width, height }
+    ];
+
+    const res = await authFetch(`http://localhost:8080/api/user/graph-layout-save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error('그래프 위치 저장 실패: ' + res.status);
+    console.log(`Graph ${dragId} position saved`);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 function makeChartResizable(container, canvas, chart) {
   // ResizeObserver를 통해 캔버스 사이즈 변경 감지
   const resizeObserver = new ResizeObserver(() => {
-    const width = container.clientWidth;
-    const height = container.clientHeight;
+  const width = container.clientWidth;
+  const height = container.clientHeight;
 
-    canvas.width = width;
-    canvas.height = height;
+  canvas.width = width;
+  canvas.height = height;
 
-    chart.resize();
-  });
+  chart.resize();
+
+  // DB 저장
+  const left = parseInt(container.style.left, 10) || 0;
+  const top = parseInt(container.style.top, 10) || 0;
+  saveGraphPositionToDB(container.dataset.dragId, left, top, width, height);
+});
 
   resizeObserver.observe(container);
 }
@@ -306,42 +355,47 @@ function makeGraphMovable(handleEl, targetEl) {
 
   handleEl.addEventListener('mousedown', (e) => {
     isDragging = true;
-    const rect = targetEl.getBoundingClientRect();
+
+    const startLeft = parseInt(targetEl.style.left, 10) || 0;
+    const startTop = parseInt(targetEl.style.top, 10) || 0;
     const parentRect = dropZone.getBoundingClientRect();
 
-    // 마우스 클릭한 위치 - 요소의 위치 (내부 상대 위치 저장)
-    offsetX = e.clientX - rect.left;
-    offsetY = e.clientY - rect.top;
+    offsetX = e.clientX - parentRect.left - startLeft;
+    offsetY = e.clientY - parentRect.top - startTop;
 
-    // 드래그 시 가장 위로
     targetEl.style.zIndex = 1000;
-
-    // Prevent text selection
     e.preventDefault();
-  });
 
-  document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
+    const onMouseMove = (e) => {
+      if (!isDragging) return;
+      let newLeft = e.clientX - parentRect.left - offsetX;
+      let newTop = e.clientY - parentRect.top - offsetY;
 
-    const parentRect = dropZone.getBoundingClientRect();
-    const targetWidth = targetEl.offsetWidth;
-    const targetHeight = targetEl.offsetHeight;
+      newLeft = Math.max(0, Math.min(parentRect.width - targetEl.offsetWidth, newLeft));
+      newTop = Math.max(0, Math.min(parentRect.height - targetEl.offsetHeight, newTop));
 
-    // 새 위치 계산 (마우스 위치 - 부모 시작점 - 오프셋)
-    let newLeft = e.clientX - parentRect.left - offsetX;
-    let newTop = e.clientY - parentRect.top - offsetY;
+      targetEl.style.left = `${newLeft}px`;
+      targetEl.style.top = `${newTop}px`;
+    };
 
-    // 경계 제한: dropZone 내부로 고정
-    newLeft = Math.max(0, Math.min(parentRect.width - targetWidth, newLeft));
-    newTop = Math.max(0, Math.min(parentRect.height - targetHeight, newTop));
+    const onMouseUp = () => {
+      if (!isDragging) return;
+      isDragging = false;
 
-    // 위치 적용
-    targetEl.style.left = `${newLeft}px`;
-    targetEl.style.top = `${newTop}px`;
-  });
+      saveGraphPositionToDB(targetEl.dataset.dragId,
+        parseInt(targetEl.style.left, 10),
+        parseInt(targetEl.style.top, 10),
+        targetEl.offsetWidth,
+        targetEl.offsetHeight
+      );
 
-  document.addEventListener('mouseup', () => {
-    isDragging = false;
+      targetEl.style.zIndex = ''; // 원래대로
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
   });
 }
 
@@ -608,23 +662,28 @@ if (token) {
 
     dropZone.addEventListener('drop', handleDrop);
 
-    function handleDrop(e) {
-      e.preventDefault();
-      dropZone.style.backgroundColor = 'white';
+function handleDrop(e) {
+  e.preventDefault();
+  dropZone.style.backgroundColor = 'white';
 
-      const dragId = e.dataTransfer.getData('text/plain');
-      if (!dragId) return;
+  const dragId = e.dataTransfer.getData('text/plain');
+  if (!dragId) return;
 
-      if (activeCharts[dragId]) {
-        alert('이미 추가된 센서 그래프입니다.');
-        return;
-      }
+  if (activeCharts[dragId]) {
+    alert('이미 추가된 센서 그래프입니다.');
+    return;
+  }
 
-      const sensor = findSensorByDragId(dragId);
-      if (!sensor) return;
+  const sensor = findSensorByDragId(dragId);
+  if (!sensor) return;
 
-      addGraphToDropZone(sensor, dragId);
-    }
+  // 마우스 좌표 계산 (dropZone 기준)
+  const rect = dropZone.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  addGraphToDropZone(sensor, dragId, x, y);
+}
 
     // ------------- 드래그 시작 이벤트 -------------
     function handleDragStart(e) {
@@ -632,7 +691,7 @@ if (token) {
     }
 
     // ------------- 드롭존에 그래프 추가 -------------
-    function addGraphToDropZone(sensor, dragId) {
+function addGraphToDropZone(sensor, dragId, left = 0, top = 0) {
   const graphId = dragId.replace(/\|/g, '-');
 
   const graphBlock = document.createElement('div');
@@ -640,9 +699,9 @@ if (token) {
   graphBlock.id = `graph-${graphId}`;
 
   Object.assign(graphBlock.style, {
-    position: 'absolute',  // 위치 이동 가능하게
-    top: '0px',
-    left: '0px',
+    position: 'absolute',
+    top: `${top}px`,
+    left: `${left}px`,
     border: '1px solid #ccc',
     borderRadius: '5px',
     backgroundColor: 'white',
@@ -652,6 +711,8 @@ if (token) {
     height: '200px',
     zIndex: 10,
   });
+
+  graphBlock.dataset.dragId = dragId;
 
   graphBlock.innerHTML = `
     <div class="drag-handle" style="cursor: move; background: #f7f7f7; padding: 5px; font-weight: bold;">
@@ -671,9 +732,7 @@ if (token) {
   const chart = new Chart(ctx, createChartConfig(sensor.sensorName, dragId, color));
   activeCharts[dragId] = chart;
 
-  makeChartResizable(graphBlock, canvas, chart); // ✅ 크기 자동 조절
-
-  // ✅ 이동 기능 추가
+  makeChartResizable(graphBlock, canvas, chart);
   makeGraphMovable(graphBlock.querySelector('.drag-handle'), graphBlock);
 
   document.getElementById(`remove-${graphId}`).addEventListener('click', () => {
@@ -699,6 +758,15 @@ if (token) {
       const timeStr = new Date(d.timestamp).toLocaleTimeString();
       const values = [{ name: d.name, value: d.value, referenceValue: d.referenceValue }];
 
+      if (d.value > d.referenceValue) {
+  const emailSensor = {
+    name: d.name,
+    currentValue: d.value,
+    threshold: d.referenceValue
+  };
+  triggerEmailAlert(emailSensor);
+}
+
       activeUpdates[dragId]?.(timeStr, values);
     } catch (e) {
       console.error('데이터 fetch 중 오류', e);
@@ -706,9 +774,10 @@ if (token) {
   }, FETCH_INTERVAL_MS);
 
   saveActiveGraphs();
+
+  return graphBlock; // ✅ 위치/크기 복원용 반환
 }
 
-    // ------------- 로컬스토리지 저장/복원 -------------
     async function saveActiveGraphs() {
   const dragIds = Object.keys(activeCharts);
   try {
@@ -723,20 +792,50 @@ if (token) {
   }
 }
 
-    async function restoreSavedGraphs() {
+async function restoreSavedGraphs() {
   try {
+    // 1️⃣ 저장된 활성 그래프 목록 불러오기
     const res = await authFetch('http://localhost:8080/api/user/graph-layout');
     if (!res.ok) throw new Error('그래프 레이아웃 불러오기 실패');
-
     const data = await res.json();
-    const saved = data.activeGraphs || [];
+    const savedGraphIds = data.activeGraphs || [];
 
-    saved.forEach(dragId => {
+    // 2️⃣ 그래프 위치/크기 정보 불러오기
+    const layoutRes = await authFetch('http://localhost:8080/api/user/graph-layout-save');
+    if (!layoutRes.ok) throw new Error('그래프 레이아웃 정보 불러오기 실패');
+    const layouts = await layoutRes.json();
+
+    console.log('🧠 복원 대상 그래프:', savedGraphIds);
+    console.log('📐 저장된 레이아웃:', layouts);
+
+    // 3️⃣ 각 그래프 복원
+    savedGraphIds.forEach(dragId => {
       const sensor = findSensorByDragId(dragId);
-      if (sensor) {
-        addGraphToDropZone(sensor, dragId);
+      if (!sensor) {
+        console.warn(`⚠️ 센서(${dragId})를 찾을 수 없습니다.`);
+        return;
+      }
+
+      // 해당 그래프의 저장된 위치/크기 찾기
+      const layout = layouts.find(l => l.dragId === dragId);
+      const left = layout?.posLeft ?? 0;
+      const top = layout?.posTop ?? 0;
+      const width = layout?.width ?? 400;
+      const height = layout?.height ?? 200;
+
+      // 그래프 생성 및 반환
+      const graphBlock = addGraphToDropZone(sensor, dragId, left, top);
+
+      // 위치와 크기 적용
+      if (graphBlock) {
+        graphBlock.style.left = `${left}px`;
+        graphBlock.style.top = `${top}px`;
+        graphBlock.style.width = `${width}px`;
+        graphBlock.style.height = `${height}px`;
       }
     });
+
+    console.log('✅ 그래프 복원 완료');
   } catch (e) {
     console.error('⚠️ 그래프 상태 복원 실패:', e);
   }
@@ -806,37 +905,53 @@ async function tryRestartSensorFetch(dragId, sensor) {
   }
 }
 
+// ---------------- 이메일 알림 ----------------
+async function triggerEmailAlert(sensor) {
+  try {
+    if (!sensor || !sensor.name) {
+      console.warn('⚠️ 센서 정보가 유효하지 않습니다:', sensor);
+      return;
+    }
+
+    // 서버에서 유연하게 처리할 수 있도록 JSON 구조 그대로 전달
+    const payload = {
+      name: sensor.name,
+      currentValue: sensor.currentValue,
+      threshold: sensor.threshold
+    };
+
+    const res = await authFetch('http://localhost:8080/api/alert/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res) return;
+    if (!res.ok) throw new Error(res.status);
+
+    console.log(`⚠️ 이메일 알림 전송: ${sensor.name}`);
+  } catch (e) {
+    console.error('이메일 알림 전송 실패', e);
+  }
+}
+
 function restartSensorFetch(dragId, sensor) {
   fetchIntervals[dragId] = setInterval(async () => {
-    try {
-      const res = await authFetch(`http://localhost:8080/api/sensors?sensorIds=${sensor.sensorId}`);
-      if (!res.ok) throw new Error('데이터 요청 실패');
+  try {
+    const res = await authFetch(`http://localhost:8080/api/sensors?sensorIds=${sensor.sensorId}`);
+    if (!res.ok) throw new Error('데이터 요청 실패');
+    const data = await res.json();
+    if (!data || data.length === 0) return;
 
-      const data = await res.json();
-      if (!data || data.length === 0) {
-        checkSensorTimeout(dragId, sensor);
-        return;
-      }
+    const d = data[0];
+    const timeStr = new Date(d.timestamp).toLocaleTimeString();
+    const values = [{ name: d.name, value: d.value, referenceValue: d.referenceValue }];
 
-      const d = data[0];
-      const now = Date.now();
-      const dataTimestamp = new Date(d.timestamp).getTime();
-
-      if (Math.abs(now - dataTimestamp) <= 1000) {
-        const timeStr = new Date(d.timestamp).toLocaleTimeString();
-        updateChart(dragId, timeStr, [{
-          name: d.name,
-          value: d.value,
-          referenceValue: d.referenceValue
-        }]);
-        lastUpdateTimestamps[dragId] = now;
-      } else {
-        checkSensorTimeout(dragId, sensor);
-      }
-    } catch (e) {
-      console.error('데이터 fetch 중 오류', e);
-    }
-  }, FETCH_INTERVAL_MS);
+    activeUpdates[dragId]?.(timeStr, values);
+  } catch (e) {
+    console.error('데이터 fetch 중 오류', e);
+  }
+}, FETCH_INTERVAL_MS);
 }
 
     // ------------- 시작 -------------
