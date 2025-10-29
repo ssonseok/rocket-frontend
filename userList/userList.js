@@ -16,8 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>${user.name}</td>
                     <td>${user.email}</td>
                     <td>${user.tel}</td>
-                    <td><button onclick="modifyUser('${user.userId}')">수정</button></td>
-                    <td><button onclick="deleteUser('${user.userId}')">삭제</button></td>
+                    <td><button class="btn btn-success btn-sm" onclick="editUser(${user.id})">수정</button></td>
+                      <td><button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">삭제</button></td>
                 `;
 
                 tableBody.appendChild(row);
